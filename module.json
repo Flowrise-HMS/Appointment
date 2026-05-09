@@ -1,0 +1,26 @@
+{
+    "name": "Appointment",
+    "alias": "appointment",
+    "description": "Staff-facing appointment scheduling, rescheduling, cancellation, check-in, and no-show tracking. Includes waitlist queue management with deterministic priority scoring, recurring appointment support, and API-first workflows for Filament calendar UI. Follows FHIR Appointment resource terminology.",
+    "keywords": [
+        "appointment",
+        "scheduling",
+        "hospital",
+        "healthcare",
+        "waitlist",
+        "fhir",
+        "calendar",
+        "check-in",
+        "no-show",
+        "recurrence"
+    ],
+    "priority": 10,
+    "providers": [
+        "Modules\\Appointment\\Providers\\AppointmentServiceProvider"
+    ],
+    "files": [],
+    "requires": [
+        "Modules\\Core",
+        "Modules\\Patient"
+    ]
+}
