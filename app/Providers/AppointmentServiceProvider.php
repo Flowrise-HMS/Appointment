@@ -3,6 +3,7 @@
 namespace Modules\Appointment\Providers;
 
 use Filament\Pages\Page;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Gate;
 use Modules\Appointment\Classes\Actions\ClinicalActions;
 use Modules\Appointment\Classes\Services\FhirAppointmentTransformer;
@@ -106,8 +107,8 @@ class AppointmentServiceProvider extends ModuleServiceProvider
      *
      * @param  $schedule
      */
-    // protected function configureSchedules(Schedule $schedule): void
-    // {
-    //     $schedule->command('inspire')->hourly();
-    // }
+    protected function configureSchedules(Schedule $schedule): void
+    {
+        $schedule->command('appointment:process-sync-outbox')->everyMinute();
+    }
 }
