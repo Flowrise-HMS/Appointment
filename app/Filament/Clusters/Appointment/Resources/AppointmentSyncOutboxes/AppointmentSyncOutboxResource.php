@@ -8,7 +8,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Modules\Appointment\Filament\Clusters\Appointment\AppointmentCluster;
-use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentSyncOutboxes\Pages\CreateAppointmentSyncOutbox;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentSyncOutboxes\Pages\EditAppointmentSyncOutbox;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentSyncOutboxes\Pages\ListAppointmentSyncOutboxes;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentSyncOutboxes\Pages\ViewAppointmentSyncOutbox;
@@ -22,7 +21,9 @@ class AppointmentSyncOutboxResource extends Resource
     protected static ?string $model = AppointmentSyncOutbox::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
     protected static bool $shouldRegisterNavigation = false;
+
     protected static ?string $cluster = AppointmentCluster::class;
 
     public static function form(Schema $schema): Schema
@@ -51,7 +52,6 @@ class AppointmentSyncOutboxResource extends Resource
     {
         return [
             'index' => ListAppointmentSyncOutboxes::route('/'),
-            'create' => CreateAppointmentSyncOutbox::route('/create'),
             'view' => ViewAppointmentSyncOutbox::route('/{record}'),
             'edit' => EditAppointmentSyncOutbox::route('/{record}/edit'),
         ];

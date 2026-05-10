@@ -18,7 +18,6 @@ use Modules\Appointment\Filament\Clusters\Appointment\Resources\WaitlistEntries\
 use Modules\Appointment\Models\WaitlistEntry;
 use Modules\Core\Enums\NavigationGroup;
 
-
 class WaitlistEntryResource extends Resource
 {
     protected static ?string $model = WaitlistEntry::class;
@@ -26,8 +25,8 @@ class WaitlistEntryResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static ?string $cluster = AppointmentCluster::class;
-    protected static string|\UnitEnum|null $navigationGroup = NavigationGroup::APPOINTMENTS;
 
+    protected static string|\UnitEnum|null $navigationGroup = NavigationGroup::APPOINTMENTS;
 
     public static function form(Schema $schema): Schema
     {

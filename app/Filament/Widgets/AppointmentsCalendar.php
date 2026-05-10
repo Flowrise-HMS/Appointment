@@ -10,7 +10,7 @@ use Modules\Appointment\Models\Appointment;
 
 class AppointmentsCalendar extends CalendarWidget
 {
-    protected function getEvents(FetchInfo $info): Collection | array | Builder
+    protected function getEvents(FetchInfo $info): Collection|array|Builder
     {
         return Appointment::query()
             ->where('start_at', '<=', $info->end)

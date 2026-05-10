@@ -1,71 +1,138 @@
 # Appointment module
 
-**In one sentence:** The Appointment module is the **scheduling desk inside the software**—it books **who** sees **which provider** or **which location**, at **what time**, tracks **status** (booked, checked in, completed, cancelled), and keeps hooks for **calendar views** and **downstream systems** when appointments change.
+Scheduling, waitlist, outbound sync outbox, and Filament admin surfaces for FlowRise HMS.
 
-## Why this module exists
+## Operator documentation (staff-facing)
 
-Hospitals run on **time**. Reception and clinics need a reliable way to reserve a slot, move it when plans change, record that the patient **arrived** (check-in), and mark **no-shows** or **cancellations** with reasons. That schedule must connect to **patients** and often to **clinical** workflows so staff are not re-typing the same story in two places.
+End-user workflows for reception, clinical staff, and administrators: **[docs/user-guide/appointments.md](../../docs/user-guide/appointments.md)**.
 
-## Where Appointment fits in FlowRise
+## Branch context (required reading)
 
-- **Depends on Core** (branches, locations, departments) and **Patient** (every appointment is for a person).
-- **Integrates with Clinical** when the Clinical module is enabled: the appointment service provider can register **header actions** on clinical workspace pages (for example, patient list, timeline, profile) so booking actions appear where clinicians already work.
+All domain models extend [`Modules\Core\Models\BaseModel`](../Core/app/Models/BaseModel.php), which applies [`BelongsToBranch`](../Core/app/Traits/BelongsToBranch.php):
 
-```mermaid
-flowchart LR
-  Core[Core]
-  Patient[Patient]
-  Appointment[Appointment]
-  Clinical[Clinical]
-  Core --> Patient
-  Core --> Appointment
-  Patient --> Appointment
-  Appointment -.->|when Clinical enabled| Clinical
+- **Global scope**: queries default to `branch_id = current_branch_id` from Laravel `Context` or `Auth::user()->branch_id`.
+- **Creating**: `branch_id` is auto-filled from that context when absent.
+
+Console commands, queues, and tests must **set branch context** or call `Model::withoutGlobalScopes()` when operating across branches.
+
+## Entity overview
+
+| Model | Table | Purpose |
+|-------|-------|---------|
+| `Appointment` | `appointments` | Core booked encounter shell (patient, location, status, times). |
+| `AppointmentParticipant` | `appointment_participants` | FHIR-style participants (`participant_type`, `actor_reference` string). |
+| `AppointmentResource` | `appointment_resources` | Room/equipment allocations with time windows; feeds conflict checks. |
+| `AppointmentRecurrenceRule` | `appointment_recurrence_rules` | **Metadata only** — no engine expands occurrences yet. |
+| `AppointmentAudit` | `appointment_audits` | Optional domain audit rows (manual / Filament); not auto-written by scheduling. |
+| `ScheduleBlock` | `appointment_schedule_blocks` | Practitioner/location blocks for conflict detection. |
+| `WaitlistEntry` | `appointment_waitlist_entries` | Prioritized wait queue per branch/patient preferences. |
+| `AppointmentSyncOutbox` | `appointment_sync_outbox` | Reliable outbound events for integrations. |
+
+## Relationships quick reference
+
+### `Appointment`
+
+- `patient`, `location`, `department`, `branch` (explicit `branch`; matches trait).
+- `primaryPractitioner` → `Staff` via **`practitioner_primary_id`** (UUID, **no FK** in DB).
+- `creator` / `updater` → `App\Models\User` via `created_by` / `updated_by`.
+- Children: `participants`, `resources`, `recurrenceRules`, `appointmentAudits`, **`syncOutboxEntries`** (filtered to `aggregate_type = appointment`).
+
+### `AppointmentSyncOutbox`
+
+- `branch()` from trait; **`appointment()`** → `Appointment` on **`aggregate_id`** when `aggregate_type` is `appointment` (`AppointmentSyncOutbox::AGGREGATE_TYPE_APPOINTMENT`).
+- Query helpers: `scopeForAppointmentAggregate()`, `scopeDue()` (pending + `available_at` elapsed).
+
+### `WaitlistEntry`
+
+- `patient`, `preferredPractitioner` (Staff, nullable UUID **no FK**), **`preferredLocation`**, `preferredDepartment`, `branch` (trait).
+
+### `AppointmentAudit`
+
+- `appointment`, `branch` (trait), **`actor`** → `User` when `actor_id` points at a web user.
+
+### `ScheduleBlock`
+
+- `branch` (trait), `practitioner` → Staff, `location`, `department`.
+
+### Child rows (`Participant`, `Resource`, `RecurrenceRule`)
+
+- `appointment`, `branch` (trait).
+
+## Soft UUID references
+
+These columns are **strings without FK** until interoperability stabilizes:
+
+- `appointments.practitioner_primary_id`
+- `appointment_participants.actor_reference`
+- `appointment_schedule_blocks.practitioner_id` (nullable)
+- `appointment_waitlist_entries.preferred_practitioner_id`
+
+Prefer Staff UUIDs where `Staff` exists; document external FHIR ids separately if needed.
+
+## Services and workflows
+
+### `AppointmentSchedulingService`
+
+- **schedule** / **reschedule** / **checkIn** / **cancel** mutate `Appointment` and enqueue **`AppointmentSyncOutbox`** rows.
+- **Practitioner conflicts**: [`AppointmentConflictService`](app/Classes/Services/AppointmentConflictService.php) checks overlapping `Appointment` rows and `ScheduleBlock`.
+- **Resource conflicts**: `hasResourceConflict` when `AppointmentResource` rows exist.
+
+### Outbox producer
+
+Events emitted today:
+
+| `event_name` | When |
+|--------------|------|
+| `appointment.booked` | After create |
+| `appointment.rescheduled` | After reschedule (+ version bump) |
+| `appointment.checked_in` | After check-in |
+| `appointment.cancelled` | After cancel |
+
+**Idempotency**: `idempotency_key` is `sha256("{appointment_id}|{event_name}|{version}")`. `AppointmentSyncOutbox::firstOrCreate` skips duplicates for the same triple.
+
+**Payload** (JSON): `appointment_id`, `status`, ISO8601 `start_at`, `end_at`.
+
+### Outbox consumer (stub)
+
+Artisan command **`appointment:process-sync-outbox`** (`Modules\Appointment\Console\Commands\ProcessAppointmentSyncOutboxCommand`) selects **due** pending rows (respects `withoutGlobalScopes`) and marks them **`completed`** — replace internals with real HTTP / message-bus dispatch.
+
+Scheduler entry (project [`routes/console.php`](../../routes/console.php) from repository root):
+
+```php
+Schedule::command('appointment:process-sync-outbox')->everyMinute();
 ```
 
-## What you can do with it (everyday language)
+Ensure host cron runs `php artisan schedule:run` every minute in production.
 
-- **Create and edit appointments** with start and end time, location, department, and primary provider where applicable.
-- **Change status** through the lifecycle (for example: booked → checked in → completed, or cancelled with a reason).
-- **Use a calendar-oriented UI** (the module integrates with the **Guava Calendar** package for rich calendar rendering—see developer note below).
-- **Prepare for external messaging**: important lifecycle changes can enqueue rows in an **appointment sync outbox** so integrations can pick them up reliably (see `AppointmentSchedulingService` and `AppointmentSyncOutbox` in code).
+Filament: **no manual create** route for outbox rows — entries are system-generated; operators may **view/edit** for troubleshooting.
 
-## How it works (simple)
+### Waitlist scoring
 
-1. Staff choose a **patient** and a **time window**, then save an appointment.
-2. The system stores the row, links it to **branch / location / department / provider** fields as filled in, and updates **status** timestamps when staff record check-in or completion.
-3. When the scheduling service records certain transitions, it may **append an outbox record** describing the event for integration workers or external systems.
-4. Optional bindings (registered in `AppointmentServiceProvider`) help translate appointments to **FHIR-style** structures or **messaging adapters** when you build hospital-to-hospital workflows—those are developer-facing contracts, not something front desk staff must understand.
+[`WaitlistScoringService`](app/Classes/Services/WaitlistScoringService.php) returns a numeric score only; persist `computed_priority_score` from Filament or a future job.
 
-## What is inside this folder (high level)
+### Recurrence rules
 
-| Path | Purpose |
-|------|---------|
-| `app/Models/` | `Appointment`, sync outbox, and related persistence. |
-| `app/Classes/Services/` | Scheduling, transformers, adapters—**business and integration logic**. |
-| `app/Classes/Actions/` | Actions wired into other modules’ pages (for example, clinical workspace). |
-| `app/Filament/` | Appointment cluster, resources, calendar pages, widgets. |
-| `app/Policies/` | Authorization for appointment records. |
-| `app/Contracts/` | Interfaces for FHIR or SIU-style adapters. |
-| `database/migrations/` | Schema for appointment tables. |
+Rules stored on `AppointmentRecurrenceRule` are **not expanded** into additional appointments. Admin CRUD is informational until a recurrence engine is implemented.
 
-## Dependencies
+### Appointment audits vs activity log
 
-- **Core** and **Patient** (`composer.json` / `module.json`).
-- **Composer package** `guava/calendar` for calendar UI components.
+- **Spatie activity log** runs on all `BaseModel` children (configurable per model).
+- **`AppointmentAudit`** is **not** populated automatically by scheduling today — use Filament for explicit audit rows or add observers later.
 
-**Module status** (how complete Appointment is versus other modules): [Module status](../../docs/shared/module-status.md).
+## Operator notes
 
+- Maintain **schedule blocks** for clinicians/locations that must not receive bookings.
+- Attach **resources** when rooms/assets must participate in conflict detection.
+- Monitor **sync outbox** for stuck `failed` / high `attempts` rows after real integrations ship.
 
+## Developer commands
 
+```bash
+php artisan appointment:process-sync-outbox --limit=50
+```
 
-## For developers
+## Tests
 
-- **Namespace:** `Modules\Appointment\...`
-- **Service provider:** `Modules\Appointment\Providers\AppointmentServiceProvider`
-  - Registers `Gate::policy` for `Appointment`.
-  - Binds `FhirAppointmentTransformerContract` and `SiuMessageAdapterContract` for interoperability code paths.
-  - Registers **clinical workspace** header actions when the Clinical module is enabled (see `registerClinicalWorkspacePatientPageHeaderActions()`).
-- **Outbox pattern:** `AppointmentSchedulingService` writes to `AppointmentSyncOutbox` on key lifecycle events for resilient downstream sync—inspect that class before claiming a feature exists beyond what it emits.
-- **Calendar UI:** Filament pages/widgets use **Guava Calendar**; the `Appointment` model implements `Eventable` to feed calendar events.
-- **Tests:** under `tests/`; run from the repository root with a path into `Modules/Appointment/tests`.
+```bash
+./vendor/bin/pest Modules/Appointment/tests
+```

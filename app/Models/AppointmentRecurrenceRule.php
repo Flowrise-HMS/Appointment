@@ -7,6 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Core\Models\BaseModel;
 
+/**
+ * Recurrence metadata attached to a parent {@see Appointment}.
+ *
+ * There is **no** runtime engine that expands this rule into additional appointment instances yet.
+ * Treat rows as configuration only until an expansion service ships.
+ */
 class AppointmentRecurrenceRule extends BaseModel
 {
     use HasFactory, HasUuids;
@@ -31,6 +37,6 @@ class AppointmentRecurrenceRule extends BaseModel
 
     public function appointment(): BelongsTo
     {
-        return $this->belongsTo(Appointment::class);
+        return $this->belongsTo(Appointment::class, 'appointment_id');
     }
 }

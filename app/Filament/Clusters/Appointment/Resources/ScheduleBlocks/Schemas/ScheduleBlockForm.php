@@ -3,8 +3,10 @@
 namespace Modules\Appointment\Filament\Clusters\Appointment\Resources\ScheduleBlocks\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Context;
 
 class ScheduleBlockForm
 {
@@ -12,13 +14,28 @@ class ScheduleBlockForm
     {
         return $schema
             ->components([
-                TextInput::make('branch_id')
+                Select::make('branch_id')
+                    ->label(__('Branch'))
+                    ->relationship('branch', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->default(Context::get('current_branch_id'))
                     ->required(),
-                TextInput::make('practitioner_id')
+                Select::make('practitioner_id')
+                    ->label(__('Practitioner'))
+                    ->relationship('practitioner', 'staff_number')
+                    ->getOptionLabelFromRecordUsing(fn ($record) => $record?->display_name)
+                    ->searchable()
                     ->default(null),
-                TextInput::make('location_id')
+                Select::make('location_id')
+                    ->label(__('Location'))
+                    ->relationship('location', 'name')
+                    ->searchable()
                     ->default(null),
-                TextInput::make('department_id')
+                Select::make('department_id')
+                    ->label(__('Department'))
+                    ->relationship('department', 'name')
+                    ->searchable()
                     ->default(null),
                 TextInput::make('resource_reference')
                     ->default(null),

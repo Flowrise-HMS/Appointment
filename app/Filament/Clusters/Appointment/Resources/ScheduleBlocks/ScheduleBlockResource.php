@@ -5,7 +5,6 @@ namespace Modules\Appointment\Filament\Clusters\Appointment\Resources\ScheduleBl
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Modules\Appointment\Filament\Clusters\Appointment\AppointmentCluster;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\ScheduleBlocks\Pages\CreateScheduleBlock;
@@ -18,12 +17,12 @@ use Modules\Appointment\Filament\Clusters\Appointment\Resources\ScheduleBlocks\T
 use Modules\Appointment\Models\ScheduleBlock;
 use Modules\Core\Enums\NavigationGroup;
 
-
 class ScheduleBlockResource extends Resource
 {
     protected static ?string $model = ScheduleBlock::class;
 
     protected static string|BackedEnum|null $navigationIcon = null;
+
     protected static string|\UnitEnum|null $navigationGroup = NavigationGroup::APPOINTMENTS;
 
     protected static ?string $cluster = AppointmentCluster::class;

@@ -27,6 +27,6 @@ class AppointmentResource extends BaseModel
 
     public function appointment(): BelongsTo
     {
-        return $this->belongsTo(Appointment::class);
+        return $this->belongsTo(Appointment::class, 'appointment_id');
     }
 }

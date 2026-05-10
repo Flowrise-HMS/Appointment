@@ -3,11 +3,11 @@
 namespace Modules\Appointment\Providers;
 
 use Filament\Pages\Page;
-use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Gate;
 use Modules\Appointment\Classes\Actions\ClinicalActions;
 use Modules\Appointment\Classes\Services\FhirAppointmentTransformer;
 use Modules\Appointment\Classes\Services\SiuMessageAdapter;
+use Modules\Appointment\Console\Commands\ProcessAppointmentSyncOutboxCommand;
 use Modules\Appointment\Contracts\FhirAppointmentTransformerContract;
 use Modules\Appointment\Contracts\SiuMessageAdapterContract;
 use Modules\Appointment\Models\Appointment;
@@ -56,6 +56,10 @@ class AppointmentServiceProvider extends ModuleServiceProvider
     public function boot(): void
     {
         parent::boot();
+
+        $this->commands([
+            ProcessAppointmentSyncOutboxCommand::class,
+        ]);
 
         Gate::policy(Appointment::class, AppointmentPolicy::class);
 

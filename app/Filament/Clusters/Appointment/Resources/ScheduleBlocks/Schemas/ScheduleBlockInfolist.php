@@ -13,12 +13,14 @@ class ScheduleBlockInfolist
             ->components([
                 TextEntry::make('id')
                     ->label('ID'),
-                TextEntry::make('branch_id'),
+                TextEntry::make('branch.name'),
                 TextEntry::make('practitioner_id')
+                    ->label(__('Practitioner'))
+                    ->state(fn ($record) => $record?->display_name)
                     ->placeholder('-'),
-                TextEntry::make('location_id')
+                TextEntry::make('location.name')
                     ->placeholder('-'),
-                TextEntry::make('department_id')
+                TextEntry::make('department.name')
                     ->placeholder('-'),
                 TextEntry::make('resource_reference')
                     ->placeholder('-'),

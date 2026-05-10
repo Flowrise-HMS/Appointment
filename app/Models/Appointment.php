@@ -2,6 +2,7 @@
 
 namespace Modules\Appointment\Models;
 
+use App\Models\User;
 use Guava\Calendar\Contracts\Eventable;
 use Guava\Calendar\ValueObjects\CalendarEvent;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -15,10 +16,10 @@ use Modules\Appointment\Enums\AppointmentStatus;
 use Modules\Appointment\Enums\AppointmentType;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\Appointments\AppointmentResource as AppointmentFilamentResource;
 use Modules\Core\Models\BaseModel;
-use Modules\Core\Models\Branch;
 use Modules\Core\Models\Department;
 use Modules\Core\Models\Location;
 use Modules\Patient\Models\Patient;
+use Modules\Staff\Models\Staff;
 
 class Appointment extends BaseModel implements Eventable
 {
@@ -67,11 +68,6 @@ class Appointment extends BaseModel implements Eventable
         return $this->belongsTo(Patient::class);
     }
 
-    public function branch(): BelongsTo
-    {
-        return $this->belongsTo(Branch::class);
-    }
-
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
@@ -100,6 +96,33 @@ class Appointment extends BaseModel implements Eventable
     public function appointmentAudits(): HasMany
     {
         return $this->hasMany(AppointmentAudit::class);
+    }
+
+    /**
+     * Integration outbox rows for this appointment ({@see AppointmentSyncOutbox::AGGREGATE_TYPE_APPOINTMENT}).
+     */
+    public function syncOutboxEntries(): HasMany
+    {
+        return $this->hasMany(AppointmentSyncOutbox::class, 'aggregate_id')
+            ->where('aggregate_type', AppointmentSyncOutbox::AGGREGATE_TYPE_APPOINTMENT);
+    }
+
+    /**
+     * Primary clinician reference (UUID); no DB FK — optional link to Staff when IDs align.
+     */
+    public function primaryPractitioner(): BelongsTo
+    {
+        return $this->belongsTo(Staff::class, 'practitioner_primary_id');
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     protected static function newFactory(): AppointmentFactory

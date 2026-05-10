@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\Appointment\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Appointment\Models\AppointmentRecurrenceRule;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class AppointmentRecurrenceRulePolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny AppointmentRecurrenceRule');
@@ -66,5 +66,4 @@ class AppointmentRecurrenceRulePolicy
     {
         return $authUser->can('Reorder AppointmentRecurrenceRule');
     }
-
 }

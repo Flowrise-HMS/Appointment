@@ -53,7 +53,7 @@ class AppointmentSchedulingService
 
         event(new AppointmentCheckedIn($appointment->id));
 
-        $appointment->fresh();
+        return $appointment->fresh();
     }
 
     public function cancel(Appointment $appointment, ?string $reasonCode = null): Appointment
@@ -70,21 +70,26 @@ class AppointmentSchedulingService
 
     protected function pushOutbox(Appointment $appointment, string $eventName): void
     {
-        AppointmentSyncOutbox::create([
-            'branch_id' => $appointment->branch_id,
-            'aggregate_type' => 'appointment',
-            'aggregate_id' => $appointment->id,
-            'event_name' => $eventName,
-            'idempotency_key' => (string) str()->uuid(),
-            'payload' => [
-                'appointment_id' => $appointment->id,
-                'status' => $appointment->status->value,
-                'start_at' => optional($appointment->start_at)->toIso8601String(),
-                'end_at' => optional($appointment->end_at)->toIso8601String(),
-            ],
-            'available_at' => now(),
-            'status' => SyncOutboxStatus::PENDING,
-        ]);
+        $idempotencyRaw = "{$appointment->id}|{$eventName}|{$appointment->version}";
+        $idempotencyKey = hash('sha256', $idempotencyRaw);
+
+        AppointmentSyncOutbox::firstOrCreate(
+            ['idempotency_key' => $idempotencyKey],
+            [
+                'branch_id' => $appointment->branch_id,
+                'aggregate_type' => AppointmentSyncOutbox::AGGREGATE_TYPE_APPOINTMENT,
+                'aggregate_id' => $appointment->id,
+                'event_name' => $eventName,
+                'payload' => [
+                    'appointment_id' => $appointment->id,
+                    'status' => $appointment->status->value,
+                    'start_at' => optional($appointment->start_at)->toIso8601String(),
+                    'end_at' => optional($appointment->end_at)->toIso8601String(),
+                ],
+                'available_at' => now(),
+                'status' => SyncOutboxStatus::PENDING,
+            ]
+        );
     }
 
     /**

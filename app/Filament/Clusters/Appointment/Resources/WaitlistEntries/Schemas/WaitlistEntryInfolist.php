@@ -13,14 +13,14 @@ class WaitlistEntryInfolist
             ->components([
                 TextEntry::make('id')
                     ->label('ID'),
-                TextEntry::make('branch_id'),
-                TextEntry::make('patient.title')
+                TextEntry::make('branch.name'),
+                TextEntry::make('patient.full_name')
                     ->label('Patient'),
-                TextEntry::make('preferred_practitioner_id')
+                TextEntry::make('preferredPractitioner.display_name')
                     ->placeholder('-'),
-                TextEntry::make('preferred_location_id')
+                TextEntry::make('preferredLocation.name')
                     ->placeholder('-'),
-                TextEntry::make('preferred_department_id')
+                TextEntry::make('preferredDepartment.name')
                     ->placeholder('-'),
                 TextEntry::make('urgency_score')
                     ->numeric(),

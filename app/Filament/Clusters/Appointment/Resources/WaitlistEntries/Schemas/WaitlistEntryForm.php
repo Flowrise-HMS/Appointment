@@ -13,16 +13,37 @@ class WaitlistEntryForm
     {
         return $schema
             ->components([
-                TextInput::make('branch_id')
+                Select::make('branch_id')
+                    ->label(__('Branch'))
+                    ->relationship('branch', 'name')
+                    ->preload()
+                    ->searchable()
                     ->required(),
                 Select::make('patient_id')
-                    ->relationship('patient', 'title')
+                    ->label(__('Patient'))
+                    ->relationship('patient', 'mrn')
+                    ->getOptionLabelFromRecordUsing(fn ($record) => $record?->full_name)
+                    ->preload()
+                    ->searchable()
                     ->required(),
-                TextInput::make('preferred_practitioner_id')
+                Select::make('preferred_practitioner_id')
+                    ->label(__('Preferred Practitioner'))
+                    ->relationship('preferredPractitioner', 'staff_number')
+                    ->getOptionLabelFromRecordUsing(fn ($record) => $record?->display_name)
+                    ->preload()
+                    ->searchable()
                     ->default(null),
-                TextInput::make('preferred_location_id')
+                Select::make('preferred_location_id')
+                    ->label(__('Preferred Location'))
+                    ->relationship('preferredLocation', 'name')
+                    ->preload()
+                    ->searchable()
                     ->default(null),
-                TextInput::make('preferred_department_id')
+                Select::make('preferred_department_id')
+                    ->label(__('Preferred Department'))
+                    ->relationship('preferredDepartment', 'name')
+                    ->preload()
+                    ->searchable()
                     ->default(null),
                 TextInput::make('urgency_score')
                     ->required()

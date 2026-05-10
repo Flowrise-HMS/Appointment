@@ -7,7 +7,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Appointment\Enums\WaitlistEntryStatus;
 use Modules\Core\Models\BaseModel;
+use Modules\Core\Models\Department;
+use Modules\Core\Models\Location;
 use Modules\Patient\Models\Patient;
+use Modules\Staff\Models\Staff;
 
 class WaitlistEntry extends BaseModel
 {
@@ -41,5 +44,20 @@ class WaitlistEntry extends BaseModel
     public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);
+    }
+
+    public function preferredPractitioner(): BelongsTo
+    {
+        return $this->belongsTo(Staff::class, 'preferred_practitioner_id');
+    }
+
+    public function preferredLocation(): BelongsTo
+    {
+        return $this->belongsTo(Location::class, 'preferred_location_id');
+    }
+
+    public function preferredDepartment(): BelongsTo
+    {
+        return $this->belongsTo(Department::class, 'preferred_department_id');
     }
 }

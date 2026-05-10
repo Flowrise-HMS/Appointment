@@ -5,6 +5,9 @@ namespace Modules\Appointment\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\Core\Models\BaseModel;
+use Modules\Core\Models\Department;
+use Modules\Core\Models\Location;
+use Modules\Staff\Models\Staff;
 
 class ScheduleBlock extends BaseModel
 {
@@ -27,4 +30,19 @@ class ScheduleBlock extends BaseModel
         'blocked_from' => 'datetime',
         'blocked_to' => 'datetime',
     ];
+
+    public function location()
+    {
+        return $this->belongsTo(Location::class, 'location_id');
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'department_id');
+    }
+
+    public function practitioner()
+    {
+        return $this->belongsTo(Staff::class, 'practitioner_id');
+    }
 }

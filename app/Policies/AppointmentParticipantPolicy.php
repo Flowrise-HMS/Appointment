@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\Appointment\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Appointment\Models\AppointmentParticipant;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class AppointmentParticipantPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny AppointmentParticipant');
@@ -66,5 +66,4 @@ class AppointmentParticipantPolicy
     {
         return $authUser->can('Reorder AppointmentParticipant');
     }
-
 }
