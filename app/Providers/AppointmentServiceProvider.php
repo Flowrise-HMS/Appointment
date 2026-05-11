@@ -104,8 +104,6 @@ class AppointmentServiceProvider extends ModuleServiceProvider
 
     /**
      * Define module schedules.
-     *
-     * @param  $schedule
      */
     protected function configureSchedules(Schedule $schedule): void
     {
