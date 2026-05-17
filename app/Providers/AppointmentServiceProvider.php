@@ -78,7 +78,7 @@ class AppointmentServiceProvider extends ModuleServiceProvider
         }
 
         $registry = $this->app->make(PageHeaderActionsRegistry::class);
-        $workspacePatientsPage = 'Modules\\Clinical\\Filament\\Clusters\\Workspace\\Pages\\Patients';
+        $workspacePatientsPage = 'Modules\\Clinical\\Filament\\Clusters\\Workspace\\Pages\\PatientWorkspace';
         $workspaceMyAgendaPage = 'Modules\\Clinical\\Filament\\Clusters\\Workspace\\Pages\\MyAgenda';
         $timelinePage = 'Modules\\Clinical\\Filament\\Clusters\\Workspace\\Pages\\Timeline';
         $patientProfilePage = 'Modules\\Clinical\\Filament\\Clusters\\Workspace\\Pages\\PatientProfile';
