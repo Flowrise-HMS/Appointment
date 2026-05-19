@@ -79,7 +79,6 @@ class AppointmentServiceProvider extends ModuleServiceProvider
 
         $registry = $this->app->make(PageHeaderActionsRegistry::class);
         $workspacePatientsPage = 'Modules\\Clinical\\Filament\\Clusters\\Workspace\\Pages\\PatientWorkspace';
-        $workspaceMyAgendaPage = 'Modules\\Clinical\\Filament\\Clusters\\Workspace\\Pages\\MyAgenda';
         $timelinePage = 'Modules\\Clinical\\Filament\\Clusters\\Workspace\\Pages\\Timeline';
         $patientProfilePage = 'Modules\\Clinical\\Filament\\Clusters\\Workspace\\Pages\\PatientProfile';
 
@@ -87,10 +86,6 @@ class AppointmentServiceProvider extends ModuleServiceProvider
 
         if (class_exists($workspacePatientsPage)) {
             $registry->register($workspacePatientsPage, $workspaceHeaderFactory);
-        }
-
-        if (class_exists($workspaceMyAgendaPage)) {
-            $registry->register($workspaceMyAgendaPage, $workspaceHeaderFactory);
         }
 
         if (class_exists($timelinePage)) {

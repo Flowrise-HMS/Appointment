@@ -23,7 +23,6 @@ final class ClinicalActions
 {
     protected const WORKSPACE_PATIENTS_PAGE = 'Modules\\Clinical\\Filament\\Clusters\\Workspace\\Pages\\Patients';
 
-    protected const WORKSPACE_MY_AGENDA_PAGE = 'Modules\\Clinical\\Filament\\Clusters\\Workspace\\Pages\\MyAgenda';
 
     protected ?Patient $patient = null;
 
@@ -64,9 +63,6 @@ final class ClinicalActions
      */
     public function workspaceHeaderActions(Page $page): array
     {
-        if ($page::class === self::WORKSPACE_PATIENTS_PAGE || $page::class === self::WORKSPACE_MY_AGENDA_PAGE) {
-            return [$this->quickCreateAppointmentFromWorkspaceAction($page)];
-        }
 
         $this->fromPage($page);
 
