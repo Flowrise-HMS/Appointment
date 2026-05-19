@@ -2,6 +2,7 @@
 
 namespace Modules\Appointment\Filament\Clusters\Appointment\Pages;
 
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Pages\Page;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
@@ -13,7 +14,7 @@ use Modules\Core\Enums\NavigationGroup;
 
 class Calendar extends Page implements HasSchemas
 {
-    use InteractsWithSchemas;
+    use InteractsWithSchemas, HasPageShield;
 
     protected Width|string|null $maxContentWidth = Width::Full;
 
