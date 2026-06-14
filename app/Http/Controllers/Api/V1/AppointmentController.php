@@ -5,10 +5,9 @@ namespace Modules\Appointment\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Modules\Appointment\Classes\Services\AppointmentSchedulingService;
 use Modules\Appointment\Enums\AppointmentStatus;
-use Modules\Appointment\Enums\AppointmentType;
+use Modules\Appointment\Http\Requests\AppointmentRequest;
 use Modules\Appointment\Models\Appointment;
 
 class AppointmentController extends Controller
@@ -30,25 +29,9 @@ class AppointmentController extends Controller
         return response()->json($appointments);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(AppointmentRequest $request): JsonResponse
     {
-        $payload = $request->validate([
-            'patient_id' => ['required', 'uuid'],
-            'branch_id' => ['required', 'uuid'],
-            'location_id' => ['nullable', 'uuid'],
-            'department_id' => ['nullable', 'uuid'],
-            'practitioner_primary_id' => ['nullable', 'uuid'],
-            'status' => ['nullable', Rule::enum(AppointmentStatus::class)],
-            'appointment_type' => ['nullable', Rule::enum(AppointmentType::class)],
-            'priority' => ['nullable', 'integer', 'between:0,99'],
-            'reason_code' => ['nullable', 'string'],
-            'reason_text' => ['nullable', 'string'],
-            'start_at' => ['required', 'date'],
-            'end_at' => ['required', 'date', 'after:start_at'],
-            'notes_encrypted' => ['nullable', 'string'],
-        ]);
-
-        $appointment = $this->schedulingService->schedule($payload);
+        $appointment = $this->schedulingService->schedule($request->validated());
 
         return response()->json($appointment, 201);
     }
@@ -58,20 +41,9 @@ class AppointmentController extends Controller
         return response()->json($appointment->load(['participants', 'resources', 'recurrenceRules']));
     }
 
-    public function update(Request $request, Appointment $appointment): JsonResponse
+    public function update(AppointmentRequest $request, Appointment $appointment): JsonResponse
     {
-        $payload = $request->validate([
-            'location_id' => ['nullable', 'uuid'],
-            'department_id' => ['nullable', 'uuid'],
-            'practitioner_primary_id' => ['nullable', 'uuid'],
-            'status' => ['nullable', Rule::enum(AppointmentStatus::class)],
-            'start_at' => ['nullable', 'date'],
-            'end_at' => ['nullable', 'date', 'after:start_at'],
-            'reason_text' => ['nullable', 'string'],
-            'notes_encrypted' => ['nullable', 'string'],
-        ]);
-
-        $updated = $this->schedulingService->reschedule($appointment, $payload);
+        $updated = $this->schedulingService->reschedule($appointment, $request->validated());
 
         return response()->json($updated);
     }
@@ -88,14 +60,10 @@ class AppointmentController extends Controller
         return response()->json($this->schedulingService->checkIn($appointment));
     }
 
-    public function cancel(Request $request, Appointment $appointment): JsonResponse
+    public function cancel(AppointmentRequest $request, Appointment $appointment): JsonResponse
     {
-        $payload = $request->validate([
-            'cancellation_reason_code' => ['nullable', 'string'],
-        ]);
-
         return response()->json(
-            $this->schedulingService->cancel($appointment, $payload['cancellation_reason_code'] ?? null)
+            $this->schedulingService->cancel($appointment, $request->validated('cancellation_reason_code'))
         );
     }
 
