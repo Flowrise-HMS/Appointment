@@ -18,6 +18,7 @@ class AppointmentParticipantFactory extends Factory
             'appointment_id' => Appointment::factory(),
             'branch_id' => Branch::factory(),
             'participant_type' => fake()->randomElement(['practitioner', 'patient', 'observer']),
+            'actor_reference' => fake()->uuid(),
             'required' => fake()->boolean(80),
             'status' => AppointmentParticipantStatus::ACCEPTED,
         ];

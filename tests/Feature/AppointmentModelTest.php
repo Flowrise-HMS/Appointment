@@ -2,7 +2,7 @@
 
 namespace Modules\Appointment\Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Modules\Appointment\Models\Appointment;
 use Modules\Appointment\Models\AppointmentParticipant;
 use Modules\Patient\Models\Patient;
@@ -11,14 +11,12 @@ use Tests\TestCase;
 
 class AppointmentModelTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->artisan('module:migrate', ['module' => 'Core', '--force' => true]);
-        $this->artisan('module:migrate', ['module' => 'Patient', '--force' => true]);
-        $this->artisan('module:migrate', ['module' => 'Appointment', '--force' => true]);
+        $this->migrateModules(['Core', 'Patient', 'Appointment']);
     }
 
     public function test_appointment_factory_creates_appointment(): void

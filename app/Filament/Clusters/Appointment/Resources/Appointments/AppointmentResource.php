@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Modules\Appointment\Filament\Clusters\Appointment\AppointmentCluster;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\Appointments\Pages\CreateAppointment;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\Appointments\Pages\EditAppointment;
+use Modules\Appointment\Filament\Clusters\Appointment\Resources\Appointments\Pages\ListAppointmentActivities;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\Appointments\Pages\ListAppointments;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\Appointments\Pages\ViewAppointment;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\Appointments\RelationManagers\AppointmentAuditsRelationManager;
@@ -66,6 +67,7 @@ class AppointmentResource extends Resource
             'create' => CreateAppointment::route('/create'),
             'view' => ViewAppointment::route('/{record}'),
             'edit' => EditAppointment::route('/{record}/edit'),
+            'activities' => ListAppointmentActivities::route('/{record}/activities'),
         ];
     }
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Appointment\Classes\Services\WaitlistScoringService;
+use Modules\Appointment\Http\Requests\WaitlistEntryRequest;
 use Modules\Appointment\Models\WaitlistEntry;
 
 class WaitlistController extends Controller
@@ -22,19 +23,9 @@ class WaitlistController extends Controller
         return response()->json($entries);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(WaitlistEntryRequest $request): JsonResponse
     {
-        $payload = $request->validate([
-            'branch_id' => ['required', 'uuid'],
-            'patient_id' => ['required', 'uuid'],
-            'preferred_practitioner_id' => ['nullable', 'uuid'],
-            'preferred_location_id' => ['nullable', 'uuid'],
-            'preferred_department_id' => ['nullable', 'uuid'],
-            'urgency_score' => ['required', 'integer', 'between:0,10'],
-            'wait_time_score' => ['required', 'integer', 'between:0,10'],
-            'referral_score' => ['required', 'integer', 'between:0,10'],
-            'manual_override_score' => ['nullable', 'integer', 'between:0,50'],
-        ]);
+        $payload = $request->validated();
 
         $payload['computed_priority_score'] = $this->scoringService->score(
             $payload['urgency_score'],

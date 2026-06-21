@@ -20,6 +20,7 @@ class AppointmentSyncOutboxFactory extends Factory
             'aggregate_id' => Appointment::factory(),
             'event_name' => fake()->randomElement(['appointment.created', 'appointment.updated', 'appointment.cancelled']),
             'payload' => ['test' => true],
+            'idempotency_key' => fake()->uuid(),
             'status' => SyncOutboxStatus::PENDING,
             'available_at' => now(),
         ];

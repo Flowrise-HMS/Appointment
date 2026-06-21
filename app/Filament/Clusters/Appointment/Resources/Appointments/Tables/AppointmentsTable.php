@@ -71,6 +71,10 @@ class AppointmentsTable
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
+                Action::make('activities')
+                    ->label('Activities')
+                    ->icon('heroicon-o-bell-alert')
+                    ->url(fn ($record) => \Modules\Appointment\Filament\Clusters\Appointment\Resources\Appointments\AppointmentResource::getUrl('activities', ['record' => $record])),
                 Action::make('checkIn')
                     ->icon('heroicon-m-arrow-right-circle')
                     ->color('success')

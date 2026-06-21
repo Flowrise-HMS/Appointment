@@ -2,7 +2,7 @@
 
 namespace Modules\Appointment\Tests\Unit;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Modules\Appointment\Models\AppointmentAudit;
 use Modules\Appointment\Models\AppointmentParticipant;
 use Modules\Appointment\Models\AppointmentRecurrenceRule;
@@ -14,14 +14,12 @@ use Tests\TestCase;
 
 class AppointmentFactorySmokeTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->artisan('module:migrate', ['module' => 'Core', '--force' => true]);
-        $this->artisan('module:migrate', ['module' => 'Patient', '--force' => true]);
-        $this->artisan('module:migrate', ['module' => 'Appointment', '--force' => true]);
+        $this->migrateModules(['Core', 'Patient', 'Appointment']);
     }
 
     public function test_appointment_audit_factory(): void

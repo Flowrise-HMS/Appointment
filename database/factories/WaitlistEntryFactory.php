@@ -21,7 +21,7 @@ class WaitlistEntryFactory extends Factory
             'wait_time_score' => fake()->numberBetween(0, 100),
             'referral_score' => fake()->numberBetween(0, 100),
             'computed_priority_score' => fake()->numberBetween(0, 300),
-            'status' => WaitlistEntryStatus::ACTIVE,
+            'status' => WaitlistEntryStatus::WAITING,
         ];
     }
 }

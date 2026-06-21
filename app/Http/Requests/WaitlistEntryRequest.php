@@ -21,10 +21,10 @@ class WaitlistEntryRequest extends FormRequest
             'preferred_practitioner_id' => ['nullable', 'uuid', 'exists:staff,id'],
             'preferred_location_id' => ['nullable', 'uuid', 'exists:locations,id'],
             'preferred_department_id' => ['nullable', 'uuid', 'exists:departments,id'],
-            'urgency_score' => ['nullable', 'integer', 'min:0', 'max:100'],
-            'wait_time_score' => ['nullable', 'integer', 'min:0', 'max:100'],
-            'referral_score' => ['nullable', 'integer', 'min:0', 'max:100'],
-            'manual_override_score' => ['nullable', 'integer', 'min:-100', 'max:100'],
+            'urgency_score' => ['required', 'integer', 'min:0', 'max:10'],
+            'wait_time_score' => ['required', 'integer', 'min:0', 'max:10'],
+            'referral_score' => ['required', 'integer', 'min:0', 'max:10'],
+            'manual_override_score' => ['nullable', 'integer', 'min:0', 'max:50'],
             'status' => ['nullable', Rule::enum(WaitlistEntryStatus::class)],
         ];
     }
