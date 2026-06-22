@@ -5,6 +5,7 @@ namespace Modules\Appointment\Filament;
 use Coolsam\Modules\Concerns\ModuleFilamentPlugin;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use Modules\Core\Settings\FeatureSettings;
 
 class AppointmentPlugin implements Plugin
 {
@@ -39,7 +40,7 @@ class AppointmentPlugin implements Plugin
     protected function appointmentsEnabled(): bool
     {
         try {
-            return app(\Modules\Core\Settings\FeatureSettings::class)->appointments_enabled;
+            return app(FeatureSettings::class)->appointments_enabled;
         } catch (\Throwable) {
             return true;
         }

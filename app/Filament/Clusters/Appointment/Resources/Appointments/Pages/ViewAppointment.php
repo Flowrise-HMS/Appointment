@@ -18,7 +18,7 @@ class ViewAppointment extends ViewRecord
             Action::make('activities')
                 ->label('Activities')
                 ->icon('heroicon-o-bell-alert')
-                ->url(fn () => \Modules\Appointment\Filament\Clusters\Appointment\Resources\Appointments\AppointmentResource::getUrl('activities', ['record' => $this->getRecord()])),
+                ->url(fn () => AppointmentResource::getUrl('activities', ['record' => $this->getRecord()])),
         ];
     }
 }

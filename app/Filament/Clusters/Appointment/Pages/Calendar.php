@@ -14,7 +14,7 @@ use Modules\Core\Enums\NavigationGroup;
 
 class Calendar extends Page implements HasSchemas
 {
-    use InteractsWithSchemas, HasPageShield;
+    use HasPageShield, InteractsWithSchemas;
 
     protected Width|string|null $maxContentWidth = Width::Full;
 

@@ -23,7 +23,6 @@ final class ClinicalActions
 {
     protected const WORKSPACE_PATIENTS_PAGE = 'Modules\\Clinical\\Filament\\Clusters\\Workspace\\Pages\\Patients';
 
-
     protected ?Patient $patient = null;
 
     public function __construct(

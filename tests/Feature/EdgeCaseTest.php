@@ -3,6 +3,7 @@
 namespace Modules\Appointment\Tests\Feature;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Carbon;
 use Modules\Appointment\Enums\AppointmentParticipantStatus;
 use Modules\Appointment\Enums\AppointmentStatus;
 use Modules\Appointment\Enums\AppointmentType;
@@ -181,8 +182,8 @@ class EdgeCaseTest extends TestCase
     public function test_appointment_casts_datetime_fields(): void
     {
         $appointment = Appointment::factory()->create();
-        $this->assertInstanceOf(\Illuminate\Support\Carbon::class, $appointment->start_at);
-        $this->assertInstanceOf(\Illuminate\Support\Carbon::class, $appointment->end_at);
+        $this->assertInstanceOf(Carbon::class, $appointment->start_at);
+        $this->assertInstanceOf(Carbon::class, $appointment->end_at);
     }
 
     // ─── Appointment participant relationship ────────────────────────────────

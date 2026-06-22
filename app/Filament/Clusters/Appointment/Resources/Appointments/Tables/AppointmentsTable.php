@@ -16,6 +16,7 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Modules\Appointment\Enums\AppointmentStatus;
+use Modules\Appointment\Filament\Clusters\Appointment\Resources\Appointments\AppointmentResource;
 
 class AppointmentsTable
 {
@@ -74,7 +75,7 @@ class AppointmentsTable
                 Action::make('activities')
                     ->label('Activities')
                     ->icon('heroicon-o-bell-alert')
-                    ->url(fn ($record) => \Modules\Appointment\Filament\Clusters\Appointment\Resources\Appointments\AppointmentResource::getUrl('activities', ['record' => $record])),
+                    ->url(fn ($record) => AppointmentResource::getUrl('activities', ['record' => $record])),
                 Action::make('checkIn')
                     ->icon('heroicon-m-arrow-right-circle')
                     ->color('success')
