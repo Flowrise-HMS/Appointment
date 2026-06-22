@@ -8,7 +8,9 @@ use Filament\Panel;
 
 class AppointmentPlugin implements Plugin
 {
-    use ModuleFilamentPlugin;
+    use ModuleFilamentPlugin {
+        register as protected traitRegister;
+    }
 
     public function getModuleName(): string
     {
@@ -20,8 +22,26 @@ class AppointmentPlugin implements Plugin
         return 'appointment';
     }
 
+    public function register(Panel $panel): void
+    {
+        if (! $this->appointmentsEnabled()) {
+            return;
+        }
+
+        $this->traitRegister($panel);
+    }
+
     public function boot(Panel $panel): void
     {
-        // TODO: Implement boot() method.
+        //
+    }
+
+    protected function appointmentsEnabled(): bool
+    {
+        try {
+            return app(\Modules\Core\Settings\FeatureSettings::class)->appointments_enabled;
+        } catch (\Throwable) {
+            return true;
+        }
     }
 }
