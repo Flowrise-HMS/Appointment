@@ -46,9 +46,10 @@ class AppointmentForm
      */
     public static function patientAndServiceSection(bool $hidePatient = false, ?string $defaultBranchId = null): Section
     {
-        if(!$defaultBranchId){
+        if (! $defaultBranchId) {
             $defaultBranchId = app(BranchService::class)->getDefaultBranchId();
         }
+
         return Section::make('Patient and Service Context')
             ->columnSpan(2)
             ->schema([
