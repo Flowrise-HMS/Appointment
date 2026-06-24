@@ -88,7 +88,7 @@ class AppointmentForm
                     ->schema([
                         Select::make('service_id')
                             ->label('Service (for billing)')
-                            ->relationship('service', 'name')
+                            ->options(fn () => Service::nonMedication()?->orderBy('name')?->pluck('name', 'id'))
                             ->searchable()
                             ->preload()
                             ->helperText('Select the billable service for this appointment. Required for self-pay check-in billing.'),
