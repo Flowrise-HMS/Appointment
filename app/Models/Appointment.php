@@ -15,9 +15,11 @@ use Modules\Appointment\Database\Factories\AppointmentFactory;
 use Modules\Appointment\Enums\AppointmentStatus;
 use Modules\Appointment\Enums\AppointmentType;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\Appointments\AppointmentResource as AppointmentFilamentResource;
+use Modules\Core\Enums\CoverageType;
 use Modules\Core\Models\BaseModel;
 use Modules\Core\Models\Department;
 use Modules\Core\Models\Location;
+use Modules\Core\Models\Service;
 use Modules\Patient\Models\Patient;
 use Modules\Staff\Models\Staff;
 
@@ -36,6 +38,8 @@ class Appointment extends BaseModel implements Eventable
         'priority',
         'service_category_code',
         'service_type_code',
+        'service_id',
+        'coverage_type',
         'reason_code',
         'reason_text',
         'start_at',
@@ -58,6 +62,7 @@ class Appointment extends BaseModel implements Eventable
         'end_at' => 'datetime',
         'checked_in_at' => 'datetime',
         'completed_at' => 'datetime',
+        'coverage_type' => CoverageType::class,
         'priority' => 'integer',
         'version' => 'integer',
         'notes_encrypted' => 'encrypted',
@@ -76,6 +81,11 @@ class Appointment extends BaseModel implements Eventable
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
+    }
+
+    public function service(): BelongsTo
+    {
+        return $this->belongsTo(Service::class);
     }
 
     public function participants(): HasMany

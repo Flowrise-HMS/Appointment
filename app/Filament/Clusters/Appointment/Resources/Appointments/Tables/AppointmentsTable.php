@@ -54,6 +54,13 @@ class AppointmentsTable
                 TextColumn::make('department.name')
                     ->label('Department')
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('service.name')
+                    ->label('Service')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->searchable(),
+                TextColumn::make('coverage_type')
+                    ->badge()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('status')

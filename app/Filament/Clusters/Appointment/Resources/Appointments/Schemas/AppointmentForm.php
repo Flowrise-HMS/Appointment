@@ -11,9 +11,12 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Modules\Appointment\Enums\AppointmentStatus;
 use Modules\Appointment\Enums\AppointmentType;
+use Modules\Core\Classes\Services\BranchService;
+use Modules\Core\Enums\CoverageType;
 use Modules\Core\Models\Branch;
 use Modules\Core\Models\Department;
 use Modules\Core\Models\Location;
+use Modules\Core\Models\Service;
 use Modules\Patient\Models\Patient;
 
 class AppointmentForm
@@ -43,6 +46,9 @@ class AppointmentForm
      */
     public static function patientAndServiceSection(bool $hidePatient = false, ?string $defaultBranchId = null): Section
     {
+        if(!$defaultBranchId){
+            $defaultBranchId = app(BranchService::class)->getDefaultBranchId();
+        }
         return Section::make('Patient and Service Context')
             ->columnSpan(2)
             ->schema([
@@ -77,6 +83,20 @@ class AppointmentForm
                             ->label('Practitioner Reference')
                             ->maxLength(36)
                             ->helperText('Use practitioner UUID/reference until Staff directory binding is added.'),
+                    ]),
+                Grid::make(2)
+                    ->schema([
+                        Select::make('service_id')
+                            ->label('Service (for billing)')
+                            ->relationship('service', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->helperText('Select the billable service for this appointment. Required for self-pay check-in billing.'),
+                        Select::make('coverage_type')
+                            ->label('Coverage')
+                            ->options(CoverageType::class)
+                            ->placeholder(__('Default (no coverage)'))
+                            ->helperText('NHIS, private insurance, or self-pay. Affects check-in billing.'),
                     ]),
             ]);
     }

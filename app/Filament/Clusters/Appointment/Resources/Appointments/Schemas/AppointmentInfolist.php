@@ -38,6 +38,8 @@ class AppointmentInfolist
                             ->schema([
                                 TextEntry::make('service_category_code')->placeholder('-'),
                                 TextEntry::make('service_type_code')->placeholder('-'),
+                                TextEntry::make('service.name')->label('Service')->placeholder('-'),
+                                TextEntry::make('coverage_type')->placeholder('-'),
                                 TextEntry::make('reason_code')->placeholder('-'),
                                 TextEntry::make('reason_text')->placeholder('-'),
                                 TextEntry::make('checked_in_at')->dateTime()->placeholder('-'),
