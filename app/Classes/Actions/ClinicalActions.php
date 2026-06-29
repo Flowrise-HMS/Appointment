@@ -21,7 +21,7 @@ use Modules\Patient\Models\Patient;
  */
 final class ClinicalActions
 {
-    protected const WORKSPACE_PATIENTS_PAGE = 'Modules\\Clinical\\Filament\\Clusters\\Workspace\\Pages\\Patients';
+    protected const WORKSPACE_PATIENTS_PAGE = 'Modules\\Clinical\\Filament\\Clusters\\Workspace\\Pages\\ClinicalWorkspace';
 
     protected ?Patient $patient = null;
 

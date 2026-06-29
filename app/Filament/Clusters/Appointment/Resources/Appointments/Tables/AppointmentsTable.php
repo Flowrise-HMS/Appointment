@@ -3,6 +3,7 @@
 namespace Modules\Appointment\Filament\Clusters\Appointment\Resources\Appointments\Tables;
 
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -76,13 +77,7 @@ class AppointmentsTable
                     ->query(fn (Builder $query) => $query->whereDate('start_at', now()->toDateString())),
             ])
             ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-                DeleteAction::make(),
-                Action::make('activities')
-                    ->label('Activities')
-                    ->icon('heroicon-o-bell-alert')
-                    ->url(fn ($record) => AppointmentResource::getUrl('activities', ['record' => $record])),
+
                 Action::make('checkIn')
                     ->icon('heroicon-m-arrow-right-circle')
                     ->color('success')
@@ -103,6 +98,15 @@ class AppointmentsTable
                         'cancellation_reason_code' => 'MANUAL_CANCEL',
                         'version' => $record->version + 1,
                     ])),
+                ActionGroup::make([
+                    ViewAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make(),
+                    Action::make('activities')
+                        ->label('Activities')
+                        ->icon('heroicon-o-bell-alert')
+                        ->url(fn ($record) => AppointmentResource::getUrl('activities', ['record' => $record])),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

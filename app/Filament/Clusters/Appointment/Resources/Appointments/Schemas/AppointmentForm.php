@@ -75,15 +75,18 @@ class AppointmentForm
                         Select::make('location_id')
                             ->label('Location')
                             ->options(fn () => Location::query()?->orderBy('name')?->pluck('name', 'id')?->toArray())
-                            ->searchable(),
+                            ->searchable()
+                            ->preload(),
                         Select::make('department_id')
                             ->label('Department')
                             ->options(fn () => Department::query()?->orderBy('name')?->pluck('name', 'id')?->toArray())
-                            ->searchable(),
-                        TextInput::make('practitioner_primary_id')
-                            ->label('Practitioner Reference')
-                            ->maxLength(36)
-                            ->helperText('Use practitioner UUID/reference until Staff directory binding is added.'),
+                            ->searchable()
+                            ->preload(),
+                        Select::make('practitioner_primary_id')
+                            ->label('Staff')
+                            ->relationship('primaryPractitioner', 'staff_number')
+                            ->searchable()
+                            ->preload(),
                     ]),
                 Grid::make(2)
                     ->schema([
@@ -97,6 +100,7 @@ class AppointmentForm
                             ->label('Coverage')
                             ->options(CoverageType::class)
                             ->placeholder(__('Default (no coverage)'))
+                            ->preload()
                             ->helperText('NHIS, private insurance, or self-pay. Affects check-in billing.'),
                     ]),
             ]);
