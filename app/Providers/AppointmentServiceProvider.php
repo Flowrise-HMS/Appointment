@@ -6,7 +6,7 @@ use Filament\Pages\Page;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Gate;
 use Modules\Appointment\Classes\Actions\ClinicalActions;
-use Modules\Appointment\Classes\Services\FhirAppointmentTransformer;
+use Modules\Appointment\Classes\Fhir\FhirAppointmentTransformer;
 use Modules\Appointment\Classes\Services\SiuMessageAdapter;
 use Modules\Appointment\Console\Commands\ProcessAppointmentSyncOutboxCommand;
 use Modules\Appointment\Contracts\FhirAppointmentTransformerContract;
