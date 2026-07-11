@@ -10,6 +10,7 @@ use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Modules\Appointment\Filament\Clusters\Appointment\AppointmentCluster;
 use Modules\Appointment\Filament\Widgets\AppointmentsCalendar;
+use Modules\Appointment\Filament\Widgets\ScheduleBlocksCalendar;
 use Modules\Core\Enums\NavigationGroup;
 
 class Calendar extends Page implements HasSchemas
@@ -30,6 +31,7 @@ class Calendar extends Page implements HasSchemas
     {
         return [
             AppointmentsCalendar::class,
+            ScheduleBlocksCalendar::class,
         ];
     }
 
