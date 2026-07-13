@@ -15,10 +15,10 @@ use Guava\Calendar\ValueObjects\FetchInfo;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Context;
 use Illuminate\Support\HtmlString;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\ScheduleBlocks\Schemas\ScheduleBlockInfolist;
 use Modules\Appointment\Models\ScheduleBlock;
+use Modules\Core\Classes\Services\BranchService;
 use Modules\Staff\Models\Staff;
 
 class ScheduleBlocksCalendar extends CalendarWidget
@@ -66,7 +66,7 @@ class ScheduleBlocksCalendar extends CalendarWidget
     protected function createScheduleBlockAction(): CreateAction
     {
         $practitionerId = $this->resolvePractitionerId();
-        $branchId = Context::get('current_branch_id', Auth::user()?->branch_id);
+        $branchId = app(BranchService::class)->getDefaultBranchId();
 
         return CreateAction::make('createScheduleBlock')
             ->model(ScheduleBlock::class)
@@ -102,7 +102,7 @@ class ScheduleBlocksCalendar extends CalendarWidget
                         ->required(),
                 ]);
             })
-            ->mutateFormDataUsing(function (array $data) use ($practitionerId, $branchId): array {
+            ->mutateDataUsing(function (array $data) use ($practitionerId, $branchId): array {
                 $data['practitioner_id'] = $practitionerId;
                 $data['branch_id'] = $branchId;
 
