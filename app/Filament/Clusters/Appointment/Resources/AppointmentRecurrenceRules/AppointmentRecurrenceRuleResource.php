@@ -10,6 +10,7 @@ use Filament\Tables\Table;
 use Modules\Appointment\Filament\Clusters\Appointment\AppointmentCluster;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentRecurrenceRules\Pages\CreateAppointmentRecurrenceRule;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentRecurrenceRules\Pages\EditAppointmentRecurrenceRule;
+use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentRecurrenceRules\Pages\ListAppointmentRecurrenceRuleActivities;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentRecurrenceRules\Pages\ListAppointmentRecurrenceRules;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentRecurrenceRules\Pages\ViewAppointmentRecurrenceRule;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentRecurrenceRules\Schemas\AppointmentRecurrenceRuleForm;
@@ -56,6 +57,7 @@ class AppointmentRecurrenceRuleResource extends Resource
             'create' => CreateAppointmentRecurrenceRule::route('/create'),
             'view' => ViewAppointmentRecurrenceRule::route('/{record}'),
             'edit' => EditAppointmentRecurrenceRule::route('/{record}/edit'),
+            'activities' => ListAppointmentRecurrenceRuleActivities::route('/{record}/activities'),
         ];
     }
 }

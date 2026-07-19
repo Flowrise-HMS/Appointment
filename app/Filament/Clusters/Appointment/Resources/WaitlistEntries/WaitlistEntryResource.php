@@ -11,6 +11,7 @@ use Modules\Appointment\Filament\Clusters\Appointment\AppointmentCluster;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\WaitlistEntries\Pages\CreateWaitlistEntry;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\WaitlistEntries\Pages\EditWaitlistEntry;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\WaitlistEntries\Pages\ListWaitlistEntries;
+use Modules\Appointment\Filament\Clusters\Appointment\Resources\WaitlistEntries\Pages\ListWaitlistEntryActivities;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\WaitlistEntries\Pages\ViewWaitlistEntry;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\WaitlistEntries\Schemas\WaitlistEntryForm;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\WaitlistEntries\Schemas\WaitlistEntryInfolist;
@@ -57,6 +58,7 @@ class WaitlistEntryResource extends Resource
             'create' => CreateWaitlistEntry::route('/create'),
             'view' => ViewWaitlistEntry::route('/{record}'),
             'edit' => EditWaitlistEntry::route('/{record}/edit'),
+            'activities' => ListWaitlistEntryActivities::route('/{record}/activities'),
         ];
     }
 }

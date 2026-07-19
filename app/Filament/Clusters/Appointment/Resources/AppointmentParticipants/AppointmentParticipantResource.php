@@ -10,6 +10,7 @@ use Filament\Tables\Table;
 use Modules\Appointment\Filament\Clusters\Appointment\AppointmentCluster;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentParticipants\Pages\CreateAppointmentParticipant;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentParticipants\Pages\EditAppointmentParticipant;
+use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentParticipants\Pages\ListAppointmentParticipantActivities;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentParticipants\Pages\ListAppointmentParticipants;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentParticipants\Pages\ViewAppointmentParticipant;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentParticipants\Schemas\AppointmentParticipantForm;
@@ -56,6 +57,7 @@ class AppointmentParticipantResource extends Resource
             'create' => CreateAppointmentParticipant::route('/create'),
             'view' => ViewAppointmentParticipant::route('/{record}'),
             'edit' => EditAppointmentParticipant::route('/{record}/edit'),
+            'activities' => ListAppointmentParticipantActivities::route('/{record}/activities'),
         ];
     }
 }

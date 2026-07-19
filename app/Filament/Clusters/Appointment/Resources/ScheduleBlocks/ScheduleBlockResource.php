@@ -9,6 +9,7 @@ use Filament\Tables\Table;
 use Modules\Appointment\Filament\Clusters\Appointment\AppointmentCluster;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\ScheduleBlocks\Pages\CreateScheduleBlock;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\ScheduleBlocks\Pages\EditScheduleBlock;
+use Modules\Appointment\Filament\Clusters\Appointment\Resources\ScheduleBlocks\Pages\ListScheduleBlockActivities;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\ScheduleBlocks\Pages\ListScheduleBlocks;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\ScheduleBlocks\Pages\ViewScheduleBlock;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\ScheduleBlocks\Schemas\ScheduleBlockForm;
@@ -56,6 +57,7 @@ class ScheduleBlockResource extends Resource
             'create' => CreateScheduleBlock::route('/create'),
             'view' => ViewScheduleBlock::route('/{record}'),
             'edit' => EditScheduleBlock::route('/{record}/edit'),
+            'activities' => ListScheduleBlockActivities::route('/{record}/activities'),
         ];
     }
 }

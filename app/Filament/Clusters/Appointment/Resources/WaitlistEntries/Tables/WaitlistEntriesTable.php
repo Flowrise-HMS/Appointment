@@ -2,6 +2,7 @@
 
 namespace Modules\Appointment\Filament\Clusters\Appointment\Resources\WaitlistEntries\Tables;
 
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -11,6 +12,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Modules\Appointment\Enums\WaitlistEntryStatus;
+use Modules\Appointment\Filament\Clusters\Appointment\Resources\WaitlistEntries\WaitlistEntryResource;
 
 class WaitlistEntriesTable
 {
@@ -73,6 +75,10 @@ class WaitlistEntriesTable
                     ->options(WaitlistEntryStatus::class),
             ])
             ->recordActions([
+                Action::make('activities')
+                    ->label('Activities')
+                    ->icon('heroicon-o-bell-alert')
+                    ->url(fn ($record) => WaitlistEntryResource::getUrl('activities', ['record' => $record])),
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),

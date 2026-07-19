@@ -3,8 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Appointment\Http\Controllers\Api\V1\AppointmentController;
 use Modules\Appointment\Http\Controllers\Api\V1\WaitlistController;
+use Modules\Core\Http\Middleware\SetCurrentApiBranch;
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
+Route::middleware(['auth:sanctum', SetCurrentApiBranch::class])->prefix('v1')->group(function () {
     Route::apiResource('appointments', AppointmentController::class)->names('appointment');
     Route::post('appointments/{appointment}/check-in', [AppointmentController::class, 'checkIn'])->name('appointment.check-in');
     Route::post('appointments/{appointment}/cancel', [AppointmentController::class, 'cancel'])->name('appointment.cancel');

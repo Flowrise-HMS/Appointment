@@ -2,6 +2,7 @@
 
 namespace Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentSyncOutboxes\Tables;
 
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -10,6 +11,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Modules\Appointment\Enums\SyncOutboxStatus;
+use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentSyncOutboxes\AppointmentSyncOutboxResource;
 
 class AppointmentSyncOutboxesTable
 {
@@ -57,6 +59,10 @@ class AppointmentSyncOutboxesTable
                     ->relationship('branch', 'name'),
             ])
             ->recordActions([
+                Action::make('activities')
+                    ->label('Activities')
+                    ->icon('heroicon-o-bell-alert')
+                    ->url(fn ($record) => AppointmentSyncOutboxResource::getUrl('activities', ['record' => $record])),
                 ViewAction::make(),
                 EditAction::make(),
             ])

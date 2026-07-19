@@ -2,21 +2,27 @@
 
 namespace Modules\Appointment\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Appointment\Classes\Services\AppointmentSchedulingService;
 use Modules\Appointment\Enums\AppointmentStatus;
 use Modules\Appointment\Http\Requests\AppointmentRequest;
 use Modules\Appointment\Models\Appointment;
+use Modules\Core\Http\Controllers\Api\ApiController;
+use Modules\Core\Http\Responses\ApiResponse;
 
-class AppointmentController extends Controller
+class AppointmentController extends ApiController
 {
     public function __construct(protected AppointmentSchedulingService $schedulingService) {}
 
+    /**
+     * @group Appointments
+     */
     public function index(Request $request): JsonResponse
     {
-        $appointments = Appointment::query()
+        $this->authorizeApi('viewAny', Appointment::class);
+
+        $paginator = Appointment::query()
             ->when($request->filled('status'), function ($query) use ($request) {
                 $status = AppointmentStatus::tryFrom((string) $request->string('status'));
 
@@ -26,49 +32,94 @@ class AppointmentController extends Controller
             ->orderBy('start_at')
             ->paginate((int) $request->integer('per_page', 20));
 
-        return response()->json($appointments);
+        return ApiResponse::ok(
+            $paginator->items(),
+            meta: [
+                'current_page' => $paginator->currentPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+                'last_page' => $paginator->lastPage(),
+            ],
+        );
     }
 
+    /**
+     * @group Appointments
+     */
     public function store(AppointmentRequest $request): JsonResponse
     {
+        $this->authorizeApi('create', Appointment::class);
+
         $appointment = $this->schedulingService->schedule($request->validated());
 
-        return response()->json($appointment, 201);
+        return ApiResponse::ok($appointment, 201);
     }
 
+    /**
+     * @group Appointments
+     */
     public function show(Appointment $appointment): JsonResponse
     {
-        return response()->json($appointment->load(['participants', 'resources', 'recurrenceRules']));
+        $this->authorizeApi('view', $appointment);
+
+        $appointment->load(['participants', 'resources', 'recurrenceRules']);
+
+        return ApiResponse::ok($appointment);
     }
 
+    /**
+     * @group Appointments
+     */
     public function update(AppointmentRequest $request, Appointment $appointment): JsonResponse
     {
+        $this->authorizeApi('update', $appointment);
+
         $updated = $this->schedulingService->reschedule($appointment, $request->validated());
 
-        return response()->json($updated);
+        return ApiResponse::ok($updated);
     }
 
+    /**
+     * @group Appointments
+     */
     public function destroy(Appointment $appointment): JsonResponse
     {
+        $this->authorizeApi('delete', $appointment);
+
         $appointment->delete();
 
-        return response()->json([], 204);
+        return ApiResponse::ok(null, 204);
     }
 
+    /**
+     * @group Appointments
+     */
     public function checkIn(Appointment $appointment): JsonResponse
     {
-        return response()->json($this->schedulingService->checkIn($appointment));
+        $this->authorizeApi('update', $appointment);
+
+        return ApiResponse::ok($this->schedulingService->checkIn($appointment));
     }
 
+    /**
+     * @group Appointments
+     */
     public function cancel(AppointmentRequest $request, Appointment $appointment): JsonResponse
     {
-        return response()->json(
+        $this->authorizeApi('update', $appointment);
+
+        return ApiResponse::ok(
             $this->schedulingService->cancel($appointment, $request->validated('cancellation_reason_code'))
         );
     }
 
+    /**
+     * @group Appointments
+     */
     public function bulkReschedule(Request $request): JsonResponse
     {
+        $this->authorizeApi('update', Appointment::class);
+
         $payload = $request->validate([
             'appointment_ids' => ['required', 'array'],
             'appointment_ids.*' => ['uuid'],
@@ -84,6 +135,6 @@ class AppointmentController extends Controller
                 'end_at' => $payload['end_at'],
             ]));
 
-        return response()->json(['count' => $updated->count()]);
+        return ApiResponse::ok(['count' => $updated->count()]);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Modules\Appointment\Filament\Clusters\Appointment\Resources\ScheduleBlocks\Tables;
 
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -10,6 +11,7 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Modules\Appointment\Filament\Clusters\Appointment\Resources\ScheduleBlocks\ScheduleBlockResource;
 
 class ScheduleBlocksTable
 {
@@ -71,6 +73,10 @@ class ScheduleBlocksTable
                     ->preload(),
             ])
             ->recordActions([
+                Action::make('activities')
+                    ->label('Activities')
+                    ->icon('heroicon-o-bell-alert')
+                    ->url(fn ($record) => ScheduleBlockResource::getUrl('activities', ['record' => $record])),
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),

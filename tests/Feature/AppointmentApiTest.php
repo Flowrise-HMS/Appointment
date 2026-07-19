@@ -2,20 +2,76 @@
 
 namespace Modules\Appointment\Tests\Feature;
 
-use PHPUnit\Framework\TestCase;
+use App\Models\User;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Modules\Appointment\Models\Appointment;
+use Modules\Core\Models\Branch;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
+use Tests\TestCase;
 
 class AppointmentApiTest extends TestCase
 {
-    public function test_it_exposes_expected_appointment_api_route_templates(): void
+    use DatabaseTransactions;
+
+    private User $user;
+
+    protected function setUp(): void
     {
-        $this->assertSame('/api/v1/appointments', '/api/v1/appointments');
-        $this->assertSame('/api/v1/appointments/{appointment}/check-in', '/api/v1/appointments/{appointment}/check-in');
-        $this->assertSame('/api/v1/appointments/{appointment}/cancel', '/api/v1/appointments/{appointment}/cancel');
+        parent::setUp();
+
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+        Permission::create(['name' => 'ViewAny Appointment', 'guard_name' => 'web']);
+        Permission::create(['name' => 'View Appointment', 'guard_name' => 'web']);
+
+        $branch = Branch::factory()->create();
+
+        $this->user = User::factory()->create([
+            'branch_id' => $branch->id,
+        ]);
     }
 
-    public function test_it_exposes_waitlist_api_route_templates(): void
+    public function test_unauthenticated_request_gets_401(): void
     {
-        $this->assertSame('/api/v1/waitlist', '/api/v1/waitlist');
-        $this->assertSame('/api/v1/waitlist/{waitlistEntry}/offer-slot', '/api/v1/waitlist/{waitlistEntry}/offer-slot');
+        $response = $this->getJson('/api/v1/appointments');
+
+        $response->assertStatus(401);
+        $response->assertJson(['success' => false]);
+    }
+
+    public function test_index_returns_appointments(): void
+    {
+        $this->user->givePermissionTo('ViewAny Appointment');
+
+        Appointment::factory()->count(3)->create(['branch_id' => $this->user->branch_id]);
+
+        $response = $this->actingAs($this->user)->getJson('/api/v1/appointments');
+
+        $response->assertStatus(200);
+        $response->assertJsonPath('success', true);
+    }
+
+    public function test_show_returns_single_appointment(): void
+    {
+        $this->user->givePermissionTo('View Appointment');
+
+        $appointment = Appointment::factory()->create(['branch_id' => $this->user->branch_id]);
+
+        $response = $this->actingAs($this->user)->getJson("/api/v1/appointments/{$appointment->id}");
+
+        $response->assertStatus(200);
+        $response->assertJsonPath('success', true);
+        $response->assertJsonPath('data.id', $appointment->id);
+    }
+
+    public function test_user_without_branch_gets_403(): void
+    {
+        $userWithoutBranch = User::factory()->create(['branch_id' => null]);
+
+        $response = $this->actingAs($userWithoutBranch)->getJson('/api/v1/appointments');
+
+        $response->assertStatus(403);
+        $response->assertJson(['success' => false]);
     }
 }

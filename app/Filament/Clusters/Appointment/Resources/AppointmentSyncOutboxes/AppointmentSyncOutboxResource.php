@@ -9,6 +9,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Modules\Appointment\Filament\Clusters\Appointment\AppointmentCluster;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentSyncOutboxes\Pages\EditAppointmentSyncOutbox;
+use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentSyncOutboxes\Pages\ListAppointmentSyncOutboxActivities;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentSyncOutboxes\Pages\ListAppointmentSyncOutboxes;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentSyncOutboxes\Pages\ViewAppointmentSyncOutbox;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentSyncOutboxes\Schemas\AppointmentSyncOutboxForm;
@@ -54,6 +55,7 @@ class AppointmentSyncOutboxResource extends Resource
             'index' => ListAppointmentSyncOutboxes::route('/'),
             'view' => ViewAppointmentSyncOutbox::route('/{record}'),
             'edit' => EditAppointmentSyncOutbox::route('/{record}/edit'),
+            'activities' => ListAppointmentSyncOutboxActivities::route('/{record}/activities'),
         ];
     }
 }

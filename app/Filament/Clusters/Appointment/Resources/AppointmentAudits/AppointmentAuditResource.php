@@ -10,6 +10,7 @@ use Filament\Tables\Table;
 use Modules\Appointment\Filament\Clusters\Appointment\AppointmentCluster;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentAudits\Pages\CreateAppointmentAudit;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentAudits\Pages\EditAppointmentAudit;
+use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentAudits\Pages\ListAppointmentAuditActivities;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentAudits\Pages\ListAppointmentAudits;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentAudits\Pages\ViewAppointmentAudit;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentAudits\Schemas\AppointmentAuditForm;
@@ -56,6 +57,7 @@ class AppointmentAuditResource extends Resource
             'create' => CreateAppointmentAudit::route('/create'),
             'view' => ViewAppointmentAudit::route('/{record}'),
             'edit' => EditAppointmentAudit::route('/{record}/edit'),
+            'activities' => ListAppointmentAuditActivities::route('/{record}/activities'),
         ];
     }
 }
