@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Modules\Appointment\Classes\Services\AppointmentSchedulingService;
 use Modules\Appointment\Enums\AppointmentStatus;
 use Modules\Appointment\Http\Requests\AppointmentRequest;
+use Modules\Appointment\Http\Resources\AppointmentTransformer;
 use Modules\Appointment\Models\Appointment;
 use Modules\Core\Http\Controllers\Api\ApiController;
 use Modules\Core\Http\Responses\ApiResponse;
@@ -22,24 +23,17 @@ class AppointmentController extends ApiController
     {
         $this->authorizeApi('viewAny', Appointment::class);
 
-        $paginator = Appointment::query()
-            ->when($request->filled('status'), function ($query) use ($request) {
-                $status = AppointmentStatus::tryFrom((string) $request->string('status'));
+        return ApiResponse::paginated(
+            Appointment::query()
+                ->when($request->filled('status'), function ($query) use ($request) {
+                    $status = AppointmentStatus::tryFrom((string) $request->string('status'));
 
-                return $status ? $query->where('status', $status) : $query;
-            })
-            ->when($request->filled('patient_id'), fn ($query) => $query->where('patient_id', $request->string('patient_id')))
-            ->orderBy('start_at')
-            ->paginate((int) $request->integer('per_page', 20));
-
-        return ApiResponse::ok(
-            $paginator->items(),
-            meta: [
-                'current_page' => $paginator->currentPage(),
-                'per_page' => $paginator->perPage(),
-                'total' => $paginator->total(),
-                'last_page' => $paginator->lastPage(),
-            ],
+                    return $status ? $query->where('status', $status) : $query;
+                })
+                ->when($request->filled('patient_id'), fn ($query) => $query->where('patient_id', $request->string('patient_id')))
+                ->orderBy('start_at'),
+            AppointmentTransformer::class,
+            (int) $request->integer('per_page', 20),
         );
     }
 
