@@ -9,6 +9,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Table;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentRecurrenceRules\AppointmentRecurrenceRuleResource;
+use Modules\Core\Support\SuperAdmin;
 
 class AppointmentRecurrenceRulesTable
 {
@@ -23,6 +24,7 @@ class AppointmentRecurrenceRulesTable
             ])
             ->recordActions([
                 Action::make('activities')
+                    ->visible(fn (): bool => SuperAdmin::check())
                     ->label('Activities')
                     ->icon('heroicon-o-bell-alert')
                     ->url(fn ($record) => AppointmentRecurrenceRuleResource::getUrl('activities', ['record' => $record])),

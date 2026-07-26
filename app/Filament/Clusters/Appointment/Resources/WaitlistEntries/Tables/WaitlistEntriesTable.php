@@ -13,6 +13,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Modules\Appointment\Enums\WaitlistEntryStatus;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\WaitlistEntries\WaitlistEntryResource;
+use Modules\Core\Support\SuperAdmin;
 
 class WaitlistEntriesTable
 {
@@ -76,6 +77,7 @@ class WaitlistEntriesTable
             ])
             ->recordActions([
                 Action::make('activities')
+                    ->visible(fn (): bool => SuperAdmin::check())
                     ->label('Activities')
                     ->icon('heroicon-o-bell-alert')
                     ->url(fn ($record) => WaitlistEntryResource::getUrl('activities', ['record' => $record])),

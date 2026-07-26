@@ -11,6 +11,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentParticipants\AppointmentParticipantResource;
+use Modules\Core\Support\SuperAdmin;
 
 class AppointmentParticipantsTable
 {
@@ -38,6 +39,7 @@ class AppointmentParticipantsTable
             ])
             ->recordActions([
                 Action::make('activities')
+                    ->visible(fn (): bool => SuperAdmin::check())
                     ->label('Activities')
                     ->icon('heroicon-o-bell-alert')
                     ->url(fn ($record) => AppointmentParticipantResource::getUrl('activities', ['record' => $record])),

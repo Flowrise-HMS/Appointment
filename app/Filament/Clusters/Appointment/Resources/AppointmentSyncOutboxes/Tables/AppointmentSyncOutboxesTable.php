@@ -12,6 +12,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Modules\Appointment\Enums\SyncOutboxStatus;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentSyncOutboxes\AppointmentSyncOutboxResource;
+use Modules\Core\Support\SuperAdmin;
 
 class AppointmentSyncOutboxesTable
 {
@@ -60,6 +61,7 @@ class AppointmentSyncOutboxesTable
             ])
             ->recordActions([
                 Action::make('activities')
+                    ->visible(fn (): bool => SuperAdmin::check())
                     ->label('Activities')
                     ->icon('heroicon-o-bell-alert')
                     ->url(fn ($record) => AppointmentSyncOutboxResource::getUrl('activities', ['record' => $record])),

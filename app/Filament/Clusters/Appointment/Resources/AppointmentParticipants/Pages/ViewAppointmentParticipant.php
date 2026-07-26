@@ -6,6 +6,7 @@ use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentParticipants\AppointmentParticipantResource;
+use Modules\Core\Support\SuperAdmin;
 
 class ViewAppointmentParticipant extends ViewRecord
 {
@@ -15,6 +16,7 @@ class ViewAppointmentParticipant extends ViewRecord
     {
         return [
             Action::make('activities')
+                ->visible(fn (): bool => SuperAdmin::check())
                 ->label('Activities')
                 ->icon('heroicon-o-bell-alert')
                 ->url(fn () => AppointmentParticipantResource::getUrl('activities', ['record' => $this->getRecord()])),

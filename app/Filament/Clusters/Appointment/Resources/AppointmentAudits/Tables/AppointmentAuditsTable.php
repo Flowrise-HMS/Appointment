@@ -9,6 +9,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Table;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentAudits\AppointmentAuditResource;
+use Modules\Core\Support\SuperAdmin;
 
 class AppointmentAuditsTable
 {
@@ -23,6 +24,7 @@ class AppointmentAuditsTable
             ])
             ->recordActions([
                 Action::make('activities')
+                    ->visible(fn (): bool => SuperAdmin::check())
                     ->label('Activities')
                     ->icon('heroicon-o-bell-alert')
                     ->url(fn ($record) => AppointmentAuditResource::getUrl('activities', ['record' => $record])),

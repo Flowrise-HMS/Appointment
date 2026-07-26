@@ -18,6 +18,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Modules\Appointment\Enums\AppointmentStatus;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\Appointments\AppointmentResource;
+use Modules\Core\Support\SuperAdmin;
 
 class AppointmentsTable
 {
@@ -103,6 +104,7 @@ class AppointmentsTable
                     EditAction::make(),
                     DeleteAction::make(),
                     Action::make('activities')
+                        ->visible(fn (): bool => SuperAdmin::check())
                         ->label('Activities')
                         ->icon('heroicon-o-bell-alert')
                         ->url(fn ($record) => AppointmentResource::getUrl('activities', ['record' => $record])),
