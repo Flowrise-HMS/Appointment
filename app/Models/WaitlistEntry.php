@@ -12,6 +12,11 @@ use Modules\Core\Models\Location;
 use Modules\Patient\Models\Patient;
 use Modules\Staff\Models\Staff;
 
+/**
+ * @property-read Staff|null $preferredPractitioner
+ *
+ * @method \Illuminate\Database\Eloquent\Relations\BelongsTo preferredPractitioner()
+ */
 class WaitlistEntry extends BaseModel
 {
     use HasFactory, HasUuids;
@@ -44,11 +49,6 @@ class WaitlistEntry extends BaseModel
     public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);
-    }
-
-    public function preferredPractitioner(): BelongsTo
-    {
-        return $this->belongsTo(Staff::class, 'preferred_practitioner_id');
     }
 
     public function preferredLocation(): BelongsTo

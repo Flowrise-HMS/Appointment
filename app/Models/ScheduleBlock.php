@@ -9,6 +9,11 @@ use Modules\Core\Models\Department;
 use Modules\Core\Models\Location;
 use Modules\Staff\Models\Staff;
 
+/**
+ * @property-read Staff|null $practitioner
+ *
+ * @method \Illuminate\Database\Eloquent\Relations\BelongsTo practitioner()
+ */
 class ScheduleBlock extends BaseModel
 {
     use HasFactory, HasUuids;
@@ -39,10 +44,5 @@ class ScheduleBlock extends BaseModel
     public function department()
     {
         return $this->belongsTo(Department::class, 'department_id');
-    }
-
-    public function practitioner()
-    {
-        return $this->belongsTo(Staff::class, 'practitioner_id');
     }
 }

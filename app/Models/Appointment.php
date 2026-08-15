@@ -23,6 +23,11 @@ use Modules\Core\Models\Service;
 use Modules\Patient\Models\Patient;
 use Modules\Staff\Models\Staff;
 
+/**
+ * @property-read Staff|null $primaryPractitioner
+ *
+ * @method \Illuminate\Database\Eloquent\Relations\BelongsTo primaryPractitioner()
+ */
 class Appointment extends BaseModel implements Eventable
 {
     use HasFactory, HasUuids, SoftDeletes;
@@ -115,14 +120,6 @@ class Appointment extends BaseModel implements Eventable
     {
         return $this->hasMany(AppointmentSyncOutbox::class, 'aggregate_id')
             ->where('aggregate_type', AppointmentSyncOutbox::AGGREGATE_TYPE_APPOINTMENT);
-    }
-
-    /**
-     * Primary clinician reference (UUID); no DB FK — optional link to Staff when IDs align.
-     */
-    public function primaryPractitioner(): BelongsTo
-    {
-        return $this->belongsTo(Staff::class, 'practitioner_primary_id');
     }
 
     public function creator(): BelongsTo
