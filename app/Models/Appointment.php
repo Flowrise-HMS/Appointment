@@ -21,10 +21,9 @@ use Modules\Core\Models\Department;
 use Modules\Core\Models\Location;
 use Modules\Core\Models\Service;
 use Modules\Patient\Models\Patient;
-use Modules\Staff\Models\Staff;
 
 /**
- * @property-read Staff|null $primaryPractitioner
+ * @property-read \Modules\Staff\Models\Staff|null $primaryPractitioner
  *
  * @method \Illuminate\Database\Eloquent\Relations\BelongsTo primaryPractitioner()
  */
