@@ -14,6 +14,7 @@ use Modules\Appointment\Contracts\SiuMessageAdapterContract;
 use Modules\Appointment\Models\Appointment;
 use Modules\Appointment\Policies\AppointmentPolicy;
 use Modules\Core\Classes\Support\PageHeaderActionsRegistry;
+use Modules\Core\Support\OptionalClass;
 use Nwidart\Modules\Facades\Module;
 use Nwidart\Modules\Support\ModuleServiceProvider;
 
@@ -65,6 +66,30 @@ class AppointmentServiceProvider extends ModuleServiceProvider
         Gate::policy(Appointment::class, AppointmentPolicy::class);
 
         $this->registerClinicalWorkspacePatientPageHeaderActions();
+        $this->registerOptionalPeerRelations();
+    }
+
+    protected function registerOptionalPeerRelations(): void
+    {
+        OptionalClass::when(
+            'Modules\\Patient\\Models\\Patient',
+            function (string $patientClass): void {
+                $patientClass::resolveRelationUsing('appointments', function ($patient) {
+                    return $patient->hasMany(Appointment::class, 'patient_id', 'id');
+                });
+            },
+            'Patient',
+        );
+
+        OptionalClass::when(
+            'Modules\\Billing\\Models\\Invoice',
+            function (string $invoiceClass): void {
+                $invoiceClass::resolveRelationUsing('appointment', function ($invoice) {
+                    return $invoice->belongsTo(Appointment::class, 'appointment_id', 'id');
+                });
+            },
+            'Billing',
+        );
     }
 
     protected function registerClinicalWorkspacePatientPageHeaderActions(): void

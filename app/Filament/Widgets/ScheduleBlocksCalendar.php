@@ -19,7 +19,7 @@ use Illuminate\Support\HtmlString;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\ScheduleBlocks\Schemas\ScheduleBlockInfolist;
 use Modules\Appointment\Models\ScheduleBlock;
 use Modules\Core\Classes\Services\BranchService;
-use Modules\Staff\Models\Staff;
+use Modules\Core\Support\OptionalClass;
 
 class ScheduleBlocksCalendar extends CalendarWidget
 {
@@ -117,8 +117,10 @@ class ScheduleBlocksCalendar extends CalendarWidget
 
     protected function resolvePractitionerId(): ?string
     {
-        $staff = Staff::where('user_id', Auth::id())->first();
-
-        return $staff?->id;
+        return OptionalClass::when(
+            'Modules\\Staff\\Models\\Staff',
+            fn (string $class) => $class::where('user_id', Auth::id())->first()?->id,
+            'Staff',
+        );
     }
 }
