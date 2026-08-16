@@ -28,7 +28,12 @@ class AppointmentRecurrenceRule extends BaseModel
         'timezone',
     ];
 
+    protected $attributes = [
+        'is_active' => true,
+    ];
+
     protected $casts = [
+        'is_active' => 'boolean',
         'by_day' => 'array',
         'until_at' => 'datetime',
         'interval' => 'integer',
