@@ -7,6 +7,7 @@ use Modules\Appointment\Models\Appointment;
 use Modules\Appointment\Models\AppointmentParticipant;
 use Modules\Core\Models\Branch;
 use Modules\Patient\Models\Patient;
+use Modules\Staff\Models\Staff;
 use Tests\TestCase;
 
 class AppointmentModelTest extends TestCase
@@ -40,6 +41,15 @@ class AppointmentModelTest extends TestCase
         $appointment = Appointment::factory()->create(['patient_id' => $patient->id]);
 
         $this->assertEquals($patient->id, $appointment->patient->id);
+    }
+
+    public function test_appointment_belongs_to_primary_practitioner(): void
+    {
+        $this->migrateModules(['Staff']);
+        $staff = Staff::factory()->create();
+        $appointment = Appointment::factory()->create(['practitioner_primary_id' => $staff->id]);
+
+        $this->assertEquals($staff->id, $appointment->primaryPractitioner->id);
     }
 
     public function test_appointment_has_participants(): void
