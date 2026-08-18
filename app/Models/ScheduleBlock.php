@@ -7,9 +7,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\Core\Models\BaseModel;
 use Modules\Core\Models\Department;
 use Modules\Core\Models\Location;
+use Modules\Staff\Models\Staff;
 
 /**
- * @property-read \Modules\Staff\Models\Staff|null $practitioner
+ * @property-read Staff|null $practitioner
  *
  * @method \Illuminate\Database\Eloquent\Relations\BelongsTo practitioner()
  */

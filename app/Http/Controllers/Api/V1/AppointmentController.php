@@ -26,7 +26,7 @@ class AppointmentController extends ApiController
         return ApiResponse::paginated(
             Appointment::query()
                 ->when($request->filled('status'), function ($query) use ($request) {
-                    $status = AppointmentStatus::tryFrom((string) $request->string('status'));
+                    $status = enum_try_from(AppointmentStatus::class, $request->string('status')->toString());
 
                     return $status ? $query->where('status', $status) : $query;
                 })
