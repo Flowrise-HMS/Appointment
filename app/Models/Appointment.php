@@ -15,21 +15,24 @@ use Modules\Appointment\Database\Factories\AppointmentFactory;
 use Modules\Appointment\Enums\AppointmentStatus;
 use Modules\Appointment\Enums\AppointmentType;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\Appointments\AppointmentResource as AppointmentFilamentResource;
+use Modules\Core\Concerns\ResolvesPatientClientIdentity;
+use Modules\Core\Contracts\ProvidesClientIdentity;
 use Modules\Core\Enums\CoverageType;
 use Modules\Core\Models\BaseModel;
 use Modules\Core\Models\Department;
 use Modules\Core\Models\Location;
 use Modules\Core\Models\Service;
 use Modules\Patient\Models\Patient;
+use Modules\Staff\Models\Staff;
 
 /**
- * @property-read \Modules\Staff\Models\Staff|null $primaryPractitioner
+ * @property-read Staff|null $primaryPractitioner
  *
  * @method \Illuminate\Database\Eloquent\Relations\BelongsTo primaryPractitioner()
  */
-class Appointment extends BaseModel implements Eventable
+class Appointment extends BaseModel implements Eventable, ProvidesClientIdentity
 {
-    use HasFactory, HasUuids, SoftDeletes;
+    use HasFactory, HasUuids, ResolvesPatientClientIdentity, SoftDeletes;
 
     protected $fillable = [
         'branch_id',
@@ -75,6 +78,11 @@ class Appointment extends BaseModel implements Eventable
     public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);
+    }
+
+    public function primaryPractitioner(): BelongsTo
+    {
+        return $this->belongsTo(Staff::class, 'practitioner_primary_id');
     }
 
     public function location(): BelongsTo

@@ -18,6 +18,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Modules\Appointment\Enums\AppointmentStatus;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\Appointments\AppointmentResource;
+use Modules\Core\Filament\Support\ClientIdentityColumn;
 use Modules\Core\Support\SuperAdmin;
 
 class AppointmentsTable
@@ -27,10 +28,8 @@ class AppointmentsTable
         return $table
             ->columns([
                 TextColumn::make('#')->rowIndex(),
-                TextColumn::make('patient.mrn')
-                    ->label('Patient')
-                    ->searchable()
-                    ->sortable(),
+                ClientIdentityColumn::make(label: __('Patient'))
+                    ->sortable(['patient.last_name']),
                 TextColumn::make('practitioner_primary_id')
                     ->label('Practitioner')
                     ->searchable()

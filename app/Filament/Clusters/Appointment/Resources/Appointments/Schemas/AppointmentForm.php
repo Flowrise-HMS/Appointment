@@ -31,11 +31,12 @@ class AppointmentForm
         bool $hidePatient = false,
         ?string $defaultBranchId = null,
         bool $includeExtendedContext = true,
+        bool $hidePractitioner = false,
     ): Schema {
         return $schema
             ->columns(3)
             ->components(array_merge(
-                [self::patientAndServiceSection($hidePatient, $defaultBranchId)],
+                [self::patientAndServiceSection($hidePatient, $defaultBranchId, $hidePractitioner)],
                 self::baseScheduleSections(),
                 $includeExtendedContext ? self::extendedContextSection() : [],
             ));
@@ -44,7 +45,7 @@ class AppointmentForm
     /**
      * Patient + branch + location (patient select hidden when scheduling from a patient context page).
      */
-    public static function patientAndServiceSection(bool $hidePatient = false, ?string $defaultBranchId = null): Section
+    public static function patientAndServiceSection(bool $hidePatient = false, ?string $defaultBranchId = null, bool $hidePractitioner = false): Section
     {
         if (! $defaultBranchId) {
             $defaultBranchId = app(BranchService::class)->getDefaultBranchId();
@@ -86,7 +87,9 @@ class AppointmentForm
                             ->label('Staff')
                             ->relationship('primaryPractitioner', 'staff_number')
                             ->searchable()
-                            ->preload(),
+                            ->preload()
+                            ->hidden($hidePractitioner)
+                            ->dehydrated(! $hidePractitioner),
                     ]),
                 Grid::make(2)
                     ->schema([

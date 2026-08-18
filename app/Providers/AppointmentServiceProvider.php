@@ -82,6 +82,16 @@ class AppointmentServiceProvider extends ModuleServiceProvider
         );
 
         OptionalClass::when(
+            'Modules\\Staff\\Models\\Staff',
+            function (string $staffClass): void {
+                $staffClass::resolveRelationUsing('appointments', function ($staff) {
+                    return $staff->hasMany(Appointment::class, 'practitioner_primary_id', 'id');
+                });
+            },
+            'Staff',
+        );
+
+        OptionalClass::when(
             'Modules\\Billing\\Models\\Invoice',
             function (string $invoiceClass): void {
                 $invoiceClass::resolveRelationUsing('appointment', function ($invoice) {
