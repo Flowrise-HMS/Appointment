@@ -5,7 +5,9 @@ namespace Modules\Appointment\Http\Controllers\Api\V1;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Appointment\Classes\Services\WaitlistScoringService;
+use Modules\Appointment\Enums\WaitlistEntryStatus;
 use Modules\Appointment\Http\Requests\WaitlistEntryRequest;
+use Modules\Appointment\Http\Resources\WaitlistEntryTransformer;
 use Modules\Appointment\Models\WaitlistEntry;
 use Modules\Core\Http\Controllers\Api\ApiController;
 use Modules\Core\Http\Responses\ApiResponse;
@@ -21,19 +23,16 @@ class WaitlistController extends ApiController
     {
         $this->authorizeApi('viewAny', WaitlistEntry::class);
 
-        $paginator = WaitlistEntry::query()
-            ->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')))
-            ->orderByDesc('computed_priority_score')
-            ->paginate((int) $request->integer('per_page', 20));
+        return ApiResponse::paginated(
+            WaitlistEntry::query()
+                ->when($request->filled('status'), function ($query) use ($request) {
+                    $status = enum_try_from(WaitlistEntryStatus::class, $request->string('status')->toString());
 
-        return ApiResponse::ok(
-            $paginator->items(),
-            meta: [
-                'current_page' => $paginator->currentPage(),
-                'per_page' => $paginator->perPage(),
-                'total' => $paginator->total(),
-                'last_page' => $paginator->lastPage(),
-            ],
+                    return $status ? $query->where('status', $status) : $query;
+                })
+                ->orderByDesc('computed_priority_score'),
+            WaitlistEntryTransformer::class,
+            (int) $request->integer('per_page', 20),
         );
     }
 
@@ -44,18 +43,9 @@ class WaitlistController extends ApiController
     {
         $this->authorizeApi('create', WaitlistEntry::class);
 
-        $payload = $request->validated();
+        $entry = $this->scoringService->createEntry($request->validated());
 
-        $payload['computed_priority_score'] = $this->scoringService->score(
-            $payload['urgency_score'],
-            $payload['wait_time_score'],
-            $payload['referral_score'],
-            $payload['manual_override_score'] ?? 0
-        );
-
-        $entry = WaitlistEntry::create($payload);
-
-        return ApiResponse::ok($entry, 201);
+        return ApiResponse::created(new WaitlistEntryTransformer($entry));
     }
 
     /**
@@ -65,8 +55,8 @@ class WaitlistController extends ApiController
     {
         $this->authorizeApi('update', $waitlistEntry);
 
-        $waitlistEntry->update(['status' => 'offered']);
+        $waitlistEntry->update(['status' => WaitlistEntryStatus::OFFERED]);
 
-        return ApiResponse::ok($waitlistEntry->fresh());
+        return ApiResponse::ok(new WaitlistEntryTransformer($waitlistEntry->fresh()));
     }
 }

@@ -46,7 +46,7 @@ class AppointmentController extends ApiController
 
         $appointment = $this->schedulingService->schedule($request->validated());
 
-        return ApiResponse::ok($appointment, 201);
+        return ApiResponse::created(new AppointmentTransformer($appointment));
     }
 
     /**
@@ -58,7 +58,7 @@ class AppointmentController extends ApiController
 
         $appointment->load(['participants', 'resources', 'recurrenceRules']);
 
-        return ApiResponse::ok($appointment);
+        return ApiResponse::ok(new AppointmentTransformer($appointment));
     }
 
     /**
@@ -70,7 +70,7 @@ class AppointmentController extends ApiController
 
         $updated = $this->schedulingService->reschedule($appointment, $request->validated());
 
-        return ApiResponse::ok($updated);
+        return ApiResponse::ok(new AppointmentTransformer($updated));
     }
 
     /**
@@ -82,7 +82,7 @@ class AppointmentController extends ApiController
 
         $appointment->delete();
 
-        return ApiResponse::ok(null, 204);
+        return ApiResponse::noContent();
     }
 
     /**
@@ -92,7 +92,9 @@ class AppointmentController extends ApiController
     {
         $this->authorizeApi('update', $appointment);
 
-        return ApiResponse::ok($this->schedulingService->checkIn($appointment));
+        return ApiResponse::ok(
+            new AppointmentTransformer($this->schedulingService->checkIn($appointment))
+        );
     }
 
     /**
@@ -103,7 +105,9 @@ class AppointmentController extends ApiController
         $this->authorizeApi('update', $appointment);
 
         return ApiResponse::ok(
-            $this->schedulingService->cancel($appointment, $request->validated('cancellation_reason_code'))
+            new AppointmentTransformer(
+                $this->schedulingService->cancel($appointment, $request->validated('cancellation_reason_code'))
+            )
         );
     }
 
