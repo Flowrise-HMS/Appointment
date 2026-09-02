@@ -8,6 +8,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Modules\Appointment\Filament\Clusters\Appointment\AppointmentCluster;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\Appointments\Pages\CreateAppointment;
@@ -34,6 +35,33 @@ class AppointmentResource extends Resource
     protected static string|\UnitEnum|null $navigationGroup = NavigationGroup::APPOINTMENTS;
 
     protected static ?string $cluster = AppointmentCluster::class;
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['reason_text', 'patient.mrn', 'patient.first_name', 'patient.middle_name', 'patient.last_name'];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        $patient = $record->patient?->full_name ?? 'Appointment';
+
+        return $record->start_at !== null
+            ? "{$patient} — {$record->start_at->format('d M Y H:i')}"
+            : $patient;
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return array_filter([
+            'Status' => $record->status?->getLabel(),
+            'Reason' => $record->reason_text,
+        ]);
+    }
+
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return parent::getGlobalSearchEloquentQuery()->with('patient');
+    }
 
     public static function form(Schema $schema): Schema
     {

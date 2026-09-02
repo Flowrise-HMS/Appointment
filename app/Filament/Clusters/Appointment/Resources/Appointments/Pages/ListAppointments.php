@@ -13,7 +13,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Livewire\Attributes\Url;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\Appointments\AppointmentResource;
+use Modules\Appointment\Filament\Exports\AppointmentExporter;
 use Modules\Appointment\Filament\Widgets\AppointmentsCalendar;
+use Modules\Core\Filament\Support\SuperAdminExportAction;
 
 class ListAppointments extends ListRecords
 {
@@ -39,6 +41,8 @@ class ListAppointments extends ListRecords
                 ->icon(fn (): Heroicon => $this->calendarMode ? Heroicon::Bars3 : Heroicon::CalendarDays)
                 ->color('gray')
                 ->action(fn (): mixed => $this->calendarMode = ! $this->calendarMode),
+            SuperAdminExportAction::make(AppointmentExporter::class)
+                ->hidden(fn (): bool => $this->calendarMode),
             CreateAction::make(),
         ];
     }
