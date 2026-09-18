@@ -23,10 +23,9 @@ use Modules\Core\Models\Department;
 use Modules\Core\Models\Location;
 use Modules\Core\Models\Service;
 use Modules\Patient\Models\Patient;
-use Modules\Staff\Models\Staff;
 
 /**
- * @property-read Staff|null $primaryPractitioner
+ * @property-read \Modules\Staff\Models\Staff|null $primaryPractitioner
  *
  * @method \Illuminate\Database\Eloquent\Relations\BelongsTo primaryPractitioner()
  */
@@ -78,11 +77,6 @@ class Appointment extends BaseModel implements Eventable, ProvidesClientIdentity
     public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);
-    }
-
-    public function primaryPractitioner(): BelongsTo
-    {
-        return $this->belongsTo(Staff::class, 'practitioner_primary_id');
     }
 
     public function location(): BelongsTo

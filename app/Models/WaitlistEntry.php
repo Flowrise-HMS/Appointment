@@ -10,10 +10,9 @@ use Modules\Core\Models\BaseModel;
 use Modules\Core\Models\Department;
 use Modules\Core\Models\Location;
 use Modules\Patient\Models\Patient;
-use Modules\Staff\Models\Staff;
 
 /**
- * @property-read Staff|null $preferredPractitioner
+ * @property-read \Modules\Staff\Models\Staff|null $preferredPractitioner
  *
  * @method \Illuminate\Database\Eloquent\Relations\BelongsTo preferredPractitioner()
  */
