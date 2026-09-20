@@ -65,10 +65,15 @@ final class ClinicalActions
 
         $this->fromPage($page);
 
-        return [$this->scheduleAppointmentAction()];
+        // Without a patient in context (workspace home) the quick action asks
+        // for the patient; with a patient selected the schedule action pre-fills it.
+        return [
+            $this->quickCreateAppointmentFromWorkspaceAction($page),
+            $this->scheduleAppointmentAction(),
+        ];
     }
 
-    protected function quickCreateAppointmentFromWorkspaceAction(Page $page): Action
+    public function quickCreateAppointmentFromWorkspaceAction(Page $page): Action
     {
         return Action::make('appointment.quick_create')
             ->label(__('Add appointment'))
@@ -100,7 +105,9 @@ final class ClinicalActions
 
                 $page->dispatch('refresh-workspace-appointments');
             })
-            ->visible(fn (): bool => Auth::check() && Gate::allows('create', Appointment::class));
+            ->visible(fn (): bool => Auth::check()
+                && $this->patient === null
+                && Gate::allows('create', Appointment::class));
     }
 
     /**
