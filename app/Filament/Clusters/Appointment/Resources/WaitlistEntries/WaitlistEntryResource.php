@@ -17,6 +17,7 @@ use Modules\Appointment\Filament\Clusters\Appointment\Resources\WaitlistEntries\
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\WaitlistEntries\Schemas\WaitlistEntryInfolist;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\WaitlistEntries\Tables\WaitlistEntriesTable;
 use Modules\Appointment\Models\WaitlistEntry;
+use Modules\Appointment\Settings\AppointmentSettings;
 use Modules\Core\Enums\NavigationGroup;
 
 class WaitlistEntryResource extends Resource
@@ -28,6 +29,16 @@ class WaitlistEntryResource extends Resource
     protected static ?string $cluster = AppointmentCluster::class;
 
     protected static string|\UnitEnum|null $navigationGroup = NavigationGroup::APPOINTMENTS;
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return app(AppointmentSettings::class)->waitlist_enabled && parent::shouldRegisterNavigation();
+    }
+
+    public static function canAccess(): bool
+    {
+        return app(AppointmentSettings::class)->waitlist_enabled && parent::canAccess();
+    }
 
     public static function form(Schema $schema): Schema
     {

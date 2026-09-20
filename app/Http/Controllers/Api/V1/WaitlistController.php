@@ -9,12 +9,18 @@ use Modules\Appointment\Enums\WaitlistEntryStatus;
 use Modules\Appointment\Http\Requests\WaitlistEntryRequest;
 use Modules\Appointment\Http\Resources\WaitlistEntryTransformer;
 use Modules\Appointment\Models\WaitlistEntry;
+use Modules\Appointment\Settings\AppointmentSettings;
 use Modules\Core\Http\Controllers\Api\ApiController;
 use Modules\Core\Http\Responses\ApiResponse;
 
 class WaitlistController extends ApiController
 {
-    public function __construct(protected WaitlistScoringService $scoringService) {}
+    public function __construct(protected WaitlistScoringService $scoringService)
+    {
+        $settings = app(AppointmentSettings::class);
+
+        abort_unless($settings->waitlist_enabled && $settings->waitlist_api_enabled, 404, 'Waitlist API is disabled.');
+    }
 
     /**
      * @group Waitlist

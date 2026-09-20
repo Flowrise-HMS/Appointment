@@ -8,9 +8,13 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Carbon;
 use Modules\Appointment\Enums\AppointmentStatus;
 use Modules\Appointment\Enums\AppointmentType;
+use Modules\Appointment\Settings\AppointmentSettings;
 use Modules\Core\Classes\Services\BranchService;
 use Modules\Core\Enums\CoverageType;
 use Modules\Core\Models\Branch;
@@ -21,6 +25,27 @@ use Modules\Patient\Models\Patient;
 
 class AppointmentForm
 {
+    public static function settings(): AppointmentSettings
+    {
+        return app(AppointmentSettings::class);
+    }
+
+    /**
+     * Virtual / telehealth appointments are only offered when telehealth is
+     * enabled in the Appointment settings.
+     *
+     * @return array<string, string>
+     */
+    public static function appointmentTypeOptions(): array
+    {
+        $telehealth = self::settings()->telehealth_enabled;
+
+        return collect(AppointmentType::cases())
+            ->reject(fn (AppointmentType $type): bool => $type === AppointmentType::VIRTUAL && ! $telehealth)
+            ->mapWithKeys(fn (AppointmentType $type): array => [$type->value => $type->getLabel()])
+            ->all();
+    }
+
     /**
      * Full resource form (create/edit).
      *
@@ -122,7 +147,7 @@ class AppointmentForm
                 ->schema([
                     Select::make('status')
                         ->options(AppointmentStatus::class)
-                        ->default(AppointmentStatus::BOOKED)
+                        ->default(fn (): string => self::settings()->default_status)
                         ->required(),
                     TextInput::make('priority')
                         ->numeric()
@@ -131,8 +156,8 @@ class AppointmentForm
                         ->default(5)
                         ->required(),
                     Select::make('appointment_type')
-                        ->options(AppointmentType::class)
-                        ->default(AppointmentType::OUTPATIENT)
+                        ->options(fn (): array => self::appointmentTypeOptions())
+                        ->default(fn (): string => self::settings()->default_type)
                         ->searchable()
                         ->nullable(),
                 ]),
@@ -145,13 +170,22 @@ class AppointmentForm
                                 ->seconds(false)
                                 ->default(now())
                                 ->required()
-                                ->native(false),
+                                ->native(false)
+                                ->live(onBlur: true)
+                                ->afterStateUpdated(function (mixed $state, Set $set, Get $get): void {
+                                    if (blank($state) || filled($get('end_at'))) {
+                                        return;
+                                    }
+
+                                    $set('end_at', Carbon::parse($state)->addMinutes(self::settings()->default_duration_minutes)->format('Y-m-d H:i:s'));
+                                }),
                             DateTimePicker::make('end_at')
                                 ->seconds(false)
+                                ->default(fn (): string => now()->addMinutes(self::settings()->default_duration_minutes)->format('Y-m-d H:i:s'))
                                 ->required()
                                 ->native(false)
                                 ->after('start_at')
-                                ->helperText('End time must be greater than start time.'),
+                                ->helperText(fn (): string => __('Defaults to :minutes minutes after the start time.', ['minutes' => self::settings()->default_duration_minutes])),
                         ]),
                 ]),
             Section::make('Reason')
