@@ -2,6 +2,7 @@
 
 namespace Modules\Appointment\Filament\Widgets;
 
+use Carbon\WeekDay;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\HtmlString;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\ScheduleBlocks\Schemas\ScheduleBlockInfolist;
 use Modules\Appointment\Models\ScheduleBlock;
+use Modules\Appointment\Settings\AppointmentSettings;
 use Modules\Core\Classes\Services\BranchService;
 use Modules\Core\Support\OptionalClass;
 
@@ -33,26 +35,34 @@ class ScheduleBlocksCalendar extends CalendarWidget
 
     protected ?string $defaultEventClickAction = 'view';
 
+    public function getFirstDay(): WeekDay
+    {
+        return enum_try_from(WeekDay::class, (int) app(AppointmentSettings::class)->calendar_first_day_of_week) ?? WeekDay::Monday;
+    }
+
     protected function getEvents(FetchInfo $info): Collection|array|Builder
     {
         $practitionerId = $this->resolvePractitionerId();
+        $branchId = app(BranchService::class)->getDefaultBranchId();
 
-        if (! $practitionerId) {
-            return [];
-        }
-
+        // Staff see their own blocks; users without a staff profile (admins,
+        // schedulers) see every block in the current branch.
         return ScheduleBlock::query()
-            ->where('practitioner_id', $practitionerId)
+            ->when(
+                $practitionerId !== null,
+                fn (Builder $query) => $query->where('practitioner_id', $practitionerId),
+                fn (Builder $query) => $query->where('branch_id', $branchId),
+            )
+            ->with('practitioner')
             ->where('blocked_from', '<=', $info->end)
             ->where('blocked_to', '>=', $info->start)
             ->get()
             ->map(fn (ScheduleBlock $block) => CalendarEvent::make($block)
-                ->title($block->reason ?? 'Unavailable')
+                ->title(self::eventTitle($block, $practitionerId === null))
                 ->start($block->blocked_from)
                 ->end($block->blocked_to)
                 ->backgroundColor('#ef4444')
                 ->textColor('#ffffff')
-                ->borderColor('#dc2626')
             );
     }
 
@@ -108,6 +118,14 @@ class ScheduleBlocksCalendar extends CalendarWidget
 
                 return $data;
             });
+    }
+
+    protected static function eventTitle(ScheduleBlock $block, bool $withPractitioner): string
+    {
+        $title = $block->reason ?? __('Unavailable');
+        $practitioner = $withPractitioner ? $block->practitioner?->display_name : null;
+
+        return filled($practitioner) ? "{$practitioner}: {$title}" : $title;
     }
 
     protected function scheduleBlockSchema(Schema $schema): Schema
