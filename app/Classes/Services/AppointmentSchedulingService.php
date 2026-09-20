@@ -6,8 +6,10 @@ use Illuminate\Support\Facades\DB;
 use Modules\Appointment\Enums\AppointmentStatus;
 use Modules\Appointment\Enums\SyncOutboxStatus;
 use Modules\Appointment\Events\AppointmentCheckedIn;
+use Modules\Appointment\Exceptions\AppointmentConflictException;
 use Modules\Appointment\Models\Appointment;
 use Modules\Appointment\Models\AppointmentSyncOutbox;
+use Modules\Appointment\Settings\AppointmentSettings;
 
 class AppointmentSchedulingService
 {
@@ -70,6 +72,11 @@ class AppointmentSchedulingService
 
     protected function pushOutbox(Appointment $appointment, string $eventName): void
     {
+        // The sync outbox only matters when external calendar sync is enabled.
+        if (! app(AppointmentSettings::class)->external_sync_enabled) {
+            return;
+        }
+
         $idempotencyRaw = "{$appointment->id}|{$eventName}|{$appointment->version}";
         $idempotencyKey = hash('sha256', $idempotencyRaw);
 
@@ -111,7 +118,7 @@ class AppointmentSchedulingService
             (string) $data['end_at'],
             $appointment?->id
         )) {
-            abort(422, 'Practitioner has a scheduling conflict for the selected slot.');
+            throw new AppointmentConflictException;
         }
     }
 }

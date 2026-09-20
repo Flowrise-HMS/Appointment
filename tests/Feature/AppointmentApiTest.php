@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Modules\Appointment\Models\Appointment;
 use Modules\Core\Models\Branch;
+use Modules\Patient\Models\Patient;
+use Modules\Staff\Models\Staff;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
@@ -73,5 +75,34 @@ class AppointmentApiTest extends TestCase
 
         $response->assertStatus(403);
         $response->assertJson(['success' => false]);
+    }
+
+    public function test_store_returns_422_for_a_practitioner_conflict(): void
+    {
+        Permission::create(['name' => 'Create Appointment', 'guard_name' => 'web']);
+        $this->user->givePermissionTo('Create Appointment');
+
+        $patient = Patient::withoutEvents(fn () => Patient::factory()->create(['branch_id' => $this->user->branch_id]));
+        $practitioner = Staff::factory()->create(['branch_id' => $this->user->branch_id]);
+        $startAt = now()->addDay()->setTime(9, 0);
+
+        Appointment::factory()->create([
+            'branch_id' => $this->user->branch_id,
+            'patient_id' => $patient->id,
+            'practitioner_primary_id' => $practitioner->id,
+            'start_at' => $startAt,
+            'end_at' => $startAt->copy()->addMinutes(30),
+        ]);
+
+        $response = $this->actingAs($this->user)->postJson('/api/v1/appointments', [
+            'patient_id' => $patient->id,
+            'branch_id' => $this->user->branch_id,
+            'practitioner_primary_id' => $practitioner->id,
+            'start_at' => $startAt->copy()->addMinutes(10)->toIso8601String(),
+            'end_at' => $startAt->copy()->addMinutes(40)->toIso8601String(),
+        ]);
+
+        $response->assertStatus(422);
+        $this->assertSame(1, Appointment::query()->count());
     }
 }

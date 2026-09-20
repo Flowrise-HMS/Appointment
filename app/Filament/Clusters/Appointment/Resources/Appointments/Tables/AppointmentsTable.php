@@ -16,8 +16,10 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Modules\Appointment\Classes\Support\AppointmentFormWriter;
 use Modules\Appointment\Enums\AppointmentStatus;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\Appointments\AppointmentResource;
+use Modules\Appointment\Models\Appointment;
 use Modules\Core\Filament\Support\ClientIdentityColumn;
 use Modules\Core\Support\SuperAdmin;
 
@@ -100,7 +102,8 @@ class AppointmentsTable
                     ])),
                 ActionGroup::make([
                     ViewAction::make(),
-                    EditAction::make(),
+                    EditAction::make()
+                        ->using(fn (Appointment $record, array $data): Appointment => AppointmentFormWriter::update($record, $data)),
                     DeleteAction::make(),
                     Action::make('activities')
                         ->visible(fn (): bool => SuperAdmin::check())
