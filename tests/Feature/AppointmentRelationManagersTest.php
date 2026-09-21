@@ -3,6 +3,7 @@
 namespace Modules\Appointment\Tests\Feature;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
@@ -17,6 +18,7 @@ use Modules\Patient\Models\Patient;
 use Modules\Staff\Database\Factories\StaffFactory;
 use Modules\Staff\Filament\Clusters\StaffCluster\Resources\Staff\Pages\ViewStaff;
 use Modules\Staff\Filament\Clusters\StaffCluster\Resources\Staff\StaffResource;
+use Modules\Staff\Models\Staff;
 use Tests\TestCase;
 
 class AppointmentRelationManagersTest extends TestCase
@@ -63,6 +65,35 @@ class AppointmentRelationManagersTest extends TestCase
             ])
             ->assertOk()
             ->assertCanSeeTableRecords($patient->appointments);
+    }
+
+    public function test_practitioner_column_shows_the_staff_name_not_the_id(): void
+    {
+        $user = User::factory()->create();
+        Gate::before(fn () => true);
+        $branch = BranchFactory::new()->create();
+        $patient = Patient::withoutEvents(fn () => PatientFactory::new()->create(['branch_id' => $branch->id]));
+        $practitioner = Staff::factory()->create(['branch_id' => $branch->id, 'first_name' => 'Efua', 'last_name' => 'Mensah']);
+        Appointment::factory()->create([
+            'branch_id' => $branch->id,
+            'patient_id' => $patient->id,
+            'practitioner_primary_id' => $practitioner->id,
+        ]);
+
+        Model::preventLazyLoading(true);
+
+        try {
+            Livewire::actingAs($user)
+                ->test(PatientAppointmentsRelationManager::class, [
+                    'ownerRecord' => $patient,
+                    'pageClass' => ViewPatient::class,
+                ])
+                ->assertOk()
+                ->assertSee('Efua Mensah')
+                ->assertDontSee($practitioner->id);
+        } finally {
+            Model::preventLazyLoading(false);
+        }
     }
 
     public function test_staff_relation_manager_lists_primary_practitioner_appointments(): void

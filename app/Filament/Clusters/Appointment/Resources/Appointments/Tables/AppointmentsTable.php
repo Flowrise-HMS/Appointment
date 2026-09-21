@@ -21,20 +21,41 @@ use Modules\Appointment\Enums\AppointmentStatus;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\Appointments\AppointmentResource;
 use Modules\Appointment\Models\Appointment;
 use Modules\Core\Filament\Support\ClientIdentityColumn;
+use Modules\Core\Support\ModuleAvailability;
 use Modules\Core\Support\SuperAdmin;
 
 class AppointmentsTable
 {
     public static function configure(Table $table): Table
     {
+        $staffEnabled = ModuleAvailability::staffEnabled();
+
         return $table
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(array_filter([
+                'patient',
+                'branch',
+                'department',
+                'service',
+                $staffEnabled ? 'primaryPractitioner' : null,
+            ])))
             ->columns([
                 TextColumn::make('#')->rowIndex(),
                 ClientIdentityColumn::make(label: __('Patient'))
                     ->sortable(['patient.last_name']),
+                // The staff relation only exists while the Staff module is enabled;
+                // fall back to the raw id so the column never breaks.
                 TextColumn::make('practitioner_primary_id')
                     ->label('Practitioner')
-                    ->searchable()
+                    ->state(fn (Appointment $record): ?string => $staffEnabled
+                        ? ($record->primaryPractitioner?->display_name ?? $record->practitioner_primary_id)
+                        : $record->practitioner_primary_id)
+                    ->placeholder('—')
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $staffEnabled
+                        ? $query->whereHas('primaryPractitioner', fn (Builder $staff) => $staff
+                            ->where('first_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%")
+                            ->orWhere('staff_number', 'like', "%{$search}%"))
+                        : $query->where('practitioner_primary_id', 'like', "%{$search}%"))
                     ->toggleable(),
                 TextColumn::make('start_at')
                     ->dateTime()

@@ -3,7 +3,6 @@
 namespace Modules\Appointment\Classes\Actions;
 
 use Filament\Actions\Action;
-use Filament\Notifications\Actions\Action as NotificationAction;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
@@ -75,7 +74,7 @@ final class ClinicalActions
 
     public function quickCreateAppointmentFromWorkspaceAction(Page $page): Action
     {
-        return Action::make('appointment.quick_create')
+        return Action::make('appointment_quick_create')
             ->label(__('Add appointment'))
             ->icon('heroicon-m-plus')
             ->color('primary')
@@ -96,7 +95,7 @@ final class ClinicalActions
                     ->when(
                         filled($viewUrl),
                         fn (Notification $n) => $n->actions([
-                            NotificationAction::make('open')
+                            Action::make('open')
                                 ->label(__('Open record'))
                                 ->url($viewUrl),
                         ])
@@ -126,7 +125,7 @@ final class ClinicalActions
 
     protected function scheduleAppointmentAction(): Action
     {
-        return Action::make('appointment.schedule')
+        return Action::make('appointment_schedule')
             ->label(__('Schedule appointment'))
             ->icon('heroicon-m-calendar-days')
             ->color('primary')

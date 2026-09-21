@@ -25,8 +25,9 @@ class ScheduleBlocksTable
                     ->searchable(),
                 TextColumn::make('branch.name')
                     ->searchable(),
-                TextColumn::make('practitioner.name')
-                    ->searchable(),
+                TextColumn::make('practitioner.display_name')
+                    ->label(__('Practitioner'))
+                    ->placeholder('—'),
                 TextColumn::make('location.name')
                     ->searchable(),
                 TextColumn::make('department.name')

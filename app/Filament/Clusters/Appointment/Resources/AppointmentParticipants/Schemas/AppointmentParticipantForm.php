@@ -18,6 +18,12 @@ class AppointmentParticipantForm
             ->components([
                 Section::make(__('Participant'))
                     ->schema([
+                        Select::make('appointment_id')
+                            ->label(__('Appointment'))
+                            ->relationship('appointment', 'id')
+                            ->searchable()
+                            ->preload()
+                            ->required(),
                         Grid::make(2)
                             ->schema([
                                 TextInput::make('participant_type')

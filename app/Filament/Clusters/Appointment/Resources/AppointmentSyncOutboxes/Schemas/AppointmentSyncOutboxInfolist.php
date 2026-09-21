@@ -25,7 +25,9 @@ class AppointmentSyncOutboxInfolist
                     ->copyable(),
                 TextEntry::make('payload')
                     ->columnSpanFull()
-                    ->formatStateUsing(fn (?array $state): string => json_encode($state ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) ?: '{}'),
+                    ->formatStateUsing(function (mixed $state): string {
+                        return json_encode(is_array($state) ? $state : ['value' => $state], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) ?: '{}';
+                    }),
                 TextEntry::make('available_at')
                     ->dateTime()
                     ->placeholder('—'),
