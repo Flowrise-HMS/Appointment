@@ -7,11 +7,14 @@ use Guava\Calendar\Filament\CalendarWidget;
 use Guava\Calendar\ValueObjects\FetchInfo;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\HtmlString;
 use Modules\Appointment\Models\Appointment;
 use Modules\Appointment\Settings\AppointmentSettings;
 
 class AppointmentsCalendar extends CalendarWidget
 {
+    protected string|HtmlString|bool|null $heading = 'My Appointments';
+
     public function getFirstDay(): WeekDay
     {
         return enum_try_from(WeekDay::class, (int) app(AppointmentSettings::class)->calendar_first_day_of_week) ?? WeekDay::Monday;
