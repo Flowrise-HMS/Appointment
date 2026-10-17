@@ -13,7 +13,16 @@ use Modules\Appointment\Settings\AppointmentSettings;
 
 class AppointmentsCalendar extends CalendarWidget
 {
-    protected string|HtmlString|bool|null $heading = 'My Appointments';
+    protected string $view = 'appointment::filament.widgets.calendar-widget';
+
+    protected string|HtmlString|bool|null $heading = 'Appointments';
+
+    protected string|HtmlString|null $description = 'Track and review scheduled patient visits, clinical consultations, and provider bookings across clinic locations.';
+
+    public function getDescription(): string|HtmlString|null
+    {
+        return $this->description ? __($this->description) : null;
+    }
 
     public function getFirstDay(): WeekDay
     {

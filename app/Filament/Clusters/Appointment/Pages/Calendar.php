@@ -35,6 +35,11 @@ class Calendar extends Page implements HasSchemas
 
     protected static string|\UnitEnum|null $navigationGroup = NavigationGroup::APPOINTMENTS;
 
+    public function getSubheading(): ?string
+    {
+        return __('Track scheduled patient appointments and manage practitioner unavailability blocks.');
+    }
+
     protected function getHeaderActions(): array
     {
         return [

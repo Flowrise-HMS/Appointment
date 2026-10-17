@@ -110,4 +110,19 @@ class CalendarPageScheduleBlockTest extends TestCase
         $this->assertCount(1, $events);
         $this->assertStringContainsString('FR-CAL-00001', (string) $events[0]['title']);
     }
+
+    public function test_calendar_widgets_display_helpful_descriptions(): void
+    {
+        Livewire::test(AppointmentsCalendar::class)
+            ->assertOk()
+            ->assertSee('Track and review scheduled patient visits');
+
+        Livewire::test(ScheduleBlocksCalendar::class)
+            ->assertOk()
+            ->assertSee('View and reserve unavailable practitioner time slots');
+
+        Livewire::test(Calendar::class)
+            ->assertOk()
+            ->assertSee('Track scheduled patient appointments and manage practitioner unavailability blocks');
+    }
 }

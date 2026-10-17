@@ -25,7 +25,16 @@ use Modules\Core\Support\OptionalClass;
 
 class ScheduleBlocksCalendar extends CalendarWidget
 {
+    protected string $view = 'appointment::filament.widgets.calendar-widget';
+
     protected string|HtmlString|bool|null $heading = 'Schedule Blocks';
+
+    protected string|HtmlString|null $description = 'View and reserve unavailable practitioner time slots (such as leave, meetings, or theatre blocks) to prevent booking conflicts.';
+
+    public function getDescription(): string|HtmlString|null
+    {
+        return $this->description ? __($this->description) : null;
+    }
 
     protected static ?int $sort = 2;
 
