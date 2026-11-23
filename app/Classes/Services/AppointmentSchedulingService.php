@@ -2,6 +2,7 @@
 
 namespace Modules\Appointment\Classes\Services;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Modules\Appointment\Enums\AppointmentStatus;
 use Modules\Appointment\Enums\SyncOutboxStatus;
@@ -13,7 +14,10 @@ use Modules\Appointment\Settings\AppointmentSettings;
 
 class AppointmentSchedulingService
 {
-    public function __construct(protected AppointmentConflictService $conflictService) {}
+    public function __construct(
+        protected AppointmentConflictService $conflictService,
+        protected ScheduleCoverageService $coverage,
+    ) {}
 
     /**
      * @param  array<string, mixed>  $data
@@ -120,5 +124,12 @@ class AppointmentSchedulingService
         )) {
             throw new AppointmentConflictException;
         }
+
+        $this->coverage->assertWithinSchedule(
+            $branchId,
+            $practitionerId,
+            Carbon::parse($data['start_at']),
+            Carbon::parse($data['end_at']),
+        );
     }
 }

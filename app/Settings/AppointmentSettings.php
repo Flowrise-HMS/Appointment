@@ -24,6 +24,9 @@ class AppointmentSettings extends Settings
 
     public int $calendar_first_day_of_week = 1;
 
+    /** Practitioners with an active schedule can only be booked inside their slots. */
+    public bool $enforce_schedules = true;
+
     public static function group(): string
     {
         return 'appointment';

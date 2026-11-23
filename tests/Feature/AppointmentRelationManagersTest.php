@@ -73,7 +73,7 @@ class AppointmentRelationManagersTest extends TestCase
         Gate::before(fn () => true);
         $branch = BranchFactory::new()->create();
         $patient = Patient::withoutEvents(fn () => PatientFactory::new()->create(['branch_id' => $branch->id]));
-        $practitioner = Staff::factory()->create(['branch_id' => $branch->id, 'first_name' => 'Efua', 'last_name' => 'Mensah']);
+        $practitioner = Staff::factory()->create(['branch_id' => $branch->id, 'first_name' => 'Efua', 'middle_name' => null, 'last_name' => 'Mensah']);
         Appointment::factory()->create([
             'branch_id' => $branch->id,
             'patient_id' => $patient->id,

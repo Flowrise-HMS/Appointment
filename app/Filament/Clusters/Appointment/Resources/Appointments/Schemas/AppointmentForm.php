@@ -14,6 +14,8 @@ use Filament\Schemas\Schema;
 use Illuminate\Support\Carbon;
 use Modules\Appointment\Enums\AppointmentStatus;
 use Modules\Appointment\Enums\AppointmentType;
+use Modules\Appointment\Enums\SlotStatus;
+use Modules\Appointment\Models\AppointmentSlot;
 use Modules\Appointment\Settings\AppointmentSettings;
 use Modules\Core\Classes\Services\BranchService;
 use Modules\Core\Enums\CoverageType;
@@ -113,6 +115,7 @@ class AppointmentForm
                             ->relationship('primaryPractitioner', 'staff_number')
                             ->searchable()
                             ->preload()
+                            ->live()
                             ->hidden($hidePractitioner)
                             ->dehydrated(! $hidePractitioner),
                     ]),
@@ -164,6 +167,24 @@ class AppointmentForm
             Section::make('Time Window')
                 ->columnSpanFull()
                 ->schema([
+                    Select::make('free_slot')
+                        ->label(__('Pick a free slot'))
+                        ->helperText(__('Upcoming free slots from this practitioner\'s schedule. Picking one fills in the time window.'))
+                        ->options(fn (Get $get): array => self::freeSlotOptions($get('practitioner_primary_id'), $get('branch_id')))
+                        ->visible(fn (Get $get): bool => self::freeSlotOptions($get('practitioner_primary_id'), $get('branch_id')) !== [])
+                        ->searchable()
+                        ->live()
+                        ->dehydrated(false)
+                        ->afterStateUpdated(function (mixed $state, Set $set): void {
+                            $slot = filled($state) ? AppointmentSlot::query()->withoutGlobalScope('branch')->find($state) : null;
+
+                            if ($slot === null) {
+                                return;
+                            }
+
+                            $set('start_at', $slot->start_at->format('Y-m-d H:i:s'));
+                            $set('end_at', $slot->end_at->format('Y-m-d H:i:s'));
+                        }),
                     Grid::make(2)
                         ->schema([
                             DateTimePicker::make('start_at')
@@ -196,6 +217,32 @@ class AppointmentForm
                         ->maxLength(2000),
                 ]),
         ];
+    }
+
+    /**
+     * Next free schedule slots for a practitioner, keyed by slot id.
+     *
+     * @return array<string, string>
+     */
+    public static function freeSlotOptions(?string $practitionerId, ?string $branchId): array
+    {
+        if (blank($practitionerId)) {
+            return [];
+        }
+
+        return AppointmentSlot::query()
+            ->withoutGlobalScope('branch')
+            ->where('practitioner_id', $practitionerId)
+            ->when(filled($branchId), fn ($query) => $query->where('branch_id', $branchId))
+            ->where('status', SlotStatus::FREE->value)
+            ->where('start_at', '>', now())
+            ->orderBy('start_at')
+            ->limit(60)
+            ->get(['id', 'start_at', 'end_at'])
+            ->mapWithKeys(fn (AppointmentSlot $slot): array => [
+                (string) $slot->id => $slot->start_at->format('D d M, H:i').'–'.$slot->end_at->format('H:i'),
+            ])
+            ->all();
     }
 
     /**

@@ -8,11 +8,18 @@ use Illuminate\Support\Facades\Gate;
 use Modules\Appointment\Classes\Actions\ClinicalActions;
 use Modules\Appointment\Classes\Fhir\FhirAppointmentTransformer;
 use Modules\Appointment\Classes\Services\SiuMessageAdapter;
+use Modules\Appointment\Console\Commands\GenerateAppointmentSlotsCommand;
 use Modules\Appointment\Console\Commands\ProcessAppointmentSyncOutboxCommand;
 use Modules\Appointment\Contracts\FhirAppointmentTransformerContract;
 use Modules\Appointment\Contracts\SiuMessageAdapterContract;
 use Modules\Appointment\Models\Appointment;
+use Modules\Appointment\Models\AppointmentSchedule;
+use Modules\Appointment\Models\AppointmentSlot;
+use Modules\Appointment\Models\ScheduleBlock;
+use Modules\Appointment\Observers\AppointmentSlotSyncObserver;
 use Modules\Appointment\Policies\AppointmentPolicy;
+use Modules\Appointment\Policies\AppointmentSchedulePolicy;
+use Modules\Appointment\Policies\AppointmentSlotPolicy;
 use Modules\Core\Classes\Support\PageHeaderActionsRegistry;
 use Modules\Core\Support\OptionalClass;
 use Nwidart\Modules\Facades\Module;
@@ -61,9 +68,15 @@ class AppointmentServiceProvider extends ModuleServiceProvider
 
         $this->commands([
             ProcessAppointmentSyncOutboxCommand::class,
+            GenerateAppointmentSlotsCommand::class,
         ]);
 
         Gate::policy(Appointment::class, AppointmentPolicy::class);
+        Gate::policy(AppointmentSchedule::class, AppointmentSchedulePolicy::class);
+        Gate::policy(AppointmentSlot::class, AppointmentSlotPolicy::class);
+
+        Appointment::observe(AppointmentSlotSyncObserver::class);
+        ScheduleBlock::observe(AppointmentSlotSyncObserver::class);
 
         $this->registerClinicalWorkspacePatientPageHeaderActions();
         $this->registerOptionalPeerRelations();
@@ -79,6 +92,16 @@ class AppointmentServiceProvider extends ModuleServiceProvider
                 });
             },
             'Patient',
+        );
+
+        OptionalClass::when(
+            'Modules\\Staff\\Models\\Staff',
+            function (string $staffClass): void {
+                AppointmentSchedule::resolveRelationUsing('practitioner', function ($schedule) use ($staffClass) {
+                    return $schedule->belongsTo($staffClass, 'practitioner_id', 'id');
+                });
+            },
+            'Staff',
         );
 
         OptionalClass::when(
@@ -142,5 +165,6 @@ class AppointmentServiceProvider extends ModuleServiceProvider
     protected function configureSchedules(Schedule $schedule): void
     {
         $schedule->command('appointment:process-sync-outbox')->everyMinute();
+        $schedule->command('appointments:generate-slots')->dailyAt('01:00')->withoutOverlapping();
     }
 }

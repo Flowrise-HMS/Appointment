@@ -59,6 +59,9 @@ class ManageAppointmentSettings extends SettingsPage
                             ->label(__('Telehealth / virtual appointments')),
                         Toggle::make('recurrence_enabled')
                             ->label(__('Recurring appointments')),
+                        Toggle::make('enforce_schedules')
+                            ->label(__('Enforce practitioner schedules'))
+                            ->helperText(__('Practitioners with an active schedule can only be booked inside their available slots.')),
                         Toggle::make('external_sync_enabled')
                             ->label(__('External sync outbox')),
                         Toggle::make('waitlist_api_enabled')
