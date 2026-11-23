@@ -5,6 +5,7 @@ namespace Modules\Appointment\Filament\Clusters\Appointment\Resources\Appointmen
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
+use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentRecurrenceRules\Actions\RecurrenceRuleActions;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentRecurrenceRules\AppointmentRecurrenceRuleResource;
 use Modules\Core\Support\SuperAdmin;
 
@@ -20,6 +21,8 @@ class ViewAppointmentRecurrenceRule extends ViewRecord
                 ->label('Activities')
                 ->icon('heroicon-o-bell-alert')
                 ->url(fn () => AppointmentRecurrenceRuleResource::getUrl('activities', ['record' => $this->getRecord()])),
+            RecurrenceRuleActions::generate(),
+            RecurrenceRuleActions::cancelSeries(),
             EditAction::make(),
         ];
     }

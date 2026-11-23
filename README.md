@@ -22,7 +22,7 @@ Console commands, queues, and tests must **set branch context** or call `Model::
 | `Appointment` | `appointments` | Core booked encounter shell (patient, location, status, times). |
 | `AppointmentParticipant` | `appointment_participants` | FHIR-style participants (`participant_type`, `actor_reference` string). |
 | `AppointmentResource` | `appointment_resources` | Room/equipment allocations with time windows; feeds conflict checks. |
-| `AppointmentRecurrenceRule` | `appointment_recurrence_rules` | Recurrence definition. `RecurrenceExpansionService::expand()` creates the occurrences; today only the MCH module calls it (ANC return dates). Rules entered through the Filament relation manager are stored but not expanded automatically. |
+| `AppointmentRecurrenceRule` | `appointment_recurrence_rules` | Recurrence definition (frequency, interval, `by_day`, occurrence count / until, timezone, active). `RecurrenceExpansionService` books the occurrences: the Filament create/edit pages and relation manager expand on save, and the MCH module calls it for ANC returns. The rule inherits the parent's branch and, if unset, the branch timezone. |
 | `AppointmentAudit` | `appointment_audits` | Optional domain audit rows (manual / Filament); not auto-written by scheduling. |
 | `ScheduleBlock` | `appointment_schedule_blocks` | Practitioner/location blocks for conflict detection. |
 | `WaitlistEntry` | `appointment_waitlist_entries` | Prioritized wait queue per branch/patient preferences. |
@@ -112,7 +112,13 @@ Filament: **no manual create** route for outbox rows — entries are system-gene
 
 ### Recurrence rules
 
-`RecurrenceExpansionService::expand(AppointmentRecurrenceRule $rule, array $overrides = [])` creates one `Appointment` per occurrence of an active rule (frequency, interval, occurrence count). It is used by the MCH module's `AncReturnScheduler` (weekly rule every 4 weeks, 8 occurrences by default). Rules created through the **Recurrence rules** relation manager on an appointment are stored only; nothing expands them automatically and the "Recurring appointments" toggle on the settings page is not consulted.
+`RecurrenceExpansionService::expand(AppointmentRecurrenceRule $rule, array $overrides = [])` creates one `Appointment` per occurrence of an active rule; `expandWithReport()` returns a `Classes\Data\RecurrenceExpansionResult` (created appointments, dates already booked, dates skipped for practitioner conflicts).
+
+- The parent appointment is the first occurrence; `occurrence_count` is the number of **additional** occurrences. Expansion stops at whichever of `occurrence_count` and `until_at` comes first (hard cap 500).
+- Dates are computed in the rule's `timezone`, so the local time of day survives DST changes; weekly rules honour `by_day` (`MON`..`SUN`, array or comma string) and otherwise repeat on the parent's weekday; monthly rules never overflow short months.
+- Expansion is idempotent: each instance carries `external_reference = recur:{ruleId}:{localDate}`. `cancelSeries()` deactivates the rule and cancels its future booked/arrived instances.
+
+Callers: the MCH module's `AncReturnScheduler` (weekly rule every 4 weeks, 8 occurrences by default) and the Filament UI. Creating a rule on the **Recurrence rules** resource or the appointment's **Recurrence rules** relation manager ("Repeat appointment") books the occurrences and shows a summary notification; saving an edit books any newly covered dates. Table and view actions **Generate occurrences** (idempotent re-run) and **Cancel series** are available to users who can update the rule. The "Recurring appointments" setting hides the relation manager and blocks the resource (`canAccess()`).
 
 ### Conflict checks and the Filament forms
 

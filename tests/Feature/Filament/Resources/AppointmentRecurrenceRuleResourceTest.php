@@ -32,6 +32,16 @@ FilamentResourceTestSuite::register([
     'createPage' => CreateAppointmentRecurrenceRule::class,
     'editPage' => EditAppointmentRecurrenceRule::class,
     'viewPage' => ViewAppointmentRecurrenceRule::class,
+    'createForm' => fn (TestCase $test): array => [
+        'appointment_id' => $test->appointment->id,
+        'frequency' => 'weekly',
+        'interval' => 1,
+        'occurrence_count' => 2,
+    ],
+    'requiredValidation' => [
+        [['frequency' => null], ['frequency' => 'required']],
+        [['occurrence_count' => null, 'until_at' => null], ['occurrence_count' => 'required_without']],
+    ],
     'hasBulkDelete' => true,
     'hasRecordDelete' => true,
     'userAttributes' => fn (TestCase $test): array => ['branch_id' => $test->branch->id],

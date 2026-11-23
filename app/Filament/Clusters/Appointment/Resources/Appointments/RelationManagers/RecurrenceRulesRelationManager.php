@@ -2,13 +2,16 @@
 
 namespace Modules\Appointment\Filament\Clusters\Appointment\Resources\Appointments\RelationManagers;
 
+use Filament\Actions\CreateAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentRecurrenceRules\Actions\RecurrenceRuleActions;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentRecurrenceRules\Schemas\AppointmentRecurrenceRuleForm;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentRecurrenceRules\Schemas\AppointmentRecurrenceRuleInfolist;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentRecurrenceRules\Tables\AppointmentRecurrenceRulesTable;
+use Modules\Appointment\Models\AppointmentRecurrenceRule;
 use Modules\Appointment\Settings\AppointmentSettings;
 
 class RecurrenceRulesRelationManager extends RelationManager
@@ -33,6 +36,11 @@ class RecurrenceRulesRelationManager extends RelationManager
 
     public function table(Table $table): Table
     {
-        return AppointmentRecurrenceRulesTable::configure($table);
+        return AppointmentRecurrenceRulesTable::configure($table)
+            ->headerActions([
+                CreateAction::make()
+                    ->label(__('Repeat appointment'))
+                    ->after(fn (AppointmentRecurrenceRule $record) => RecurrenceRuleActions::expandAndNotify($record)),
+            ]);
     }
 }

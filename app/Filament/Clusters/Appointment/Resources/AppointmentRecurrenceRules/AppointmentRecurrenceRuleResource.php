@@ -17,6 +17,8 @@ use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentRecur
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentRecurrenceRules\Schemas\AppointmentRecurrenceRuleInfolist;
 use Modules\Appointment\Filament\Clusters\Appointment\Resources\AppointmentRecurrenceRules\Tables\AppointmentRecurrenceRulesTable;
 use Modules\Appointment\Models\AppointmentRecurrenceRule;
+use Modules\Appointment\Settings\AppointmentSettings;
+use Throwable;
 
 class AppointmentRecurrenceRuleResource extends Resource
 {
@@ -27,6 +29,21 @@ class AppointmentRecurrenceRuleResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static ?string $cluster = AppointmentCluster::class;
+
+    /**
+     * The Appointments "Recurrence" setting blocks the resource itself, not
+     * just the relation manager on the appointment page.
+     */
+    public static function canAccess(): bool
+    {
+        try {
+            $enabled = app(AppointmentSettings::class)->recurrence_enabled;
+        } catch (Throwable) {
+            $enabled = true;
+        }
+
+        return $enabled && parent::canAccess();
+    }
 
     public static function form(Schema $schema): Schema
     {
