@@ -1,8 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Modules\Appointment\Http\Controllers\AppointmentController;
-
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('appointments', [AppointmentController::class, 'index'])->name('appointment.index');
-});
+/*
+| The Appointment module has no web routes: the UI is the Filament
+| Appointments cluster. (The nwidart scaffold `GET /appointments` route, which
+| rendered a placeholder page, was removed.)
+*/
