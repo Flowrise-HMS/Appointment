@@ -153,7 +153,7 @@ Callers: the MCH module's `AncReturnScheduler` (weekly rule every 4 weeks, 8 occ
 
 ## REST API (when the Api module is enabled)
 
-`/api/v1/appointments` (apiResource), `POST /api/v1/appointments/{id}/check-in`, `POST /api/v1/appointments/{id}/cancel`, `POST /api/v1/appointments/bulk-reschedule`, `GET/POST /api/v1/waitlist`, `POST /api/v1/waitlist/{id}/offer-slot` (Sanctum + `api.branch`). FHIR `Appointment` and `AppointmentResponse` are read/search through the FHIR module.
+`appointments` (with `check-in`, `cancel`, `bulk-reschedule`), `waitlist` (`offer-slot`), `schedules` (`generate-slots`), `slots`, `recurrence-rules` (`generate`, `cancel-series`), `schedule-blocks` under `/api/v1`, token scope `appointments`. FHIR `Appointment` and `AppointmentResponse` are read/search through the FHIR module.
 
 ## Operator notes
 
@@ -171,7 +171,7 @@ php artisan appointments:generate-slots [--schedule=<uuid>]
 ## Tests
 
 ```bash
-php artisan test --compact Modules/Appointment/tests   # 13 test files
+php artisan test --compact Modules/Appointment/tests   # 28 test files
 ```
 
-10 migrations, 8 factories, 7 policies. Verified against code on 2026-09-20.
+11 migrations, 11 factories. Verified against code on 2026-11-24.
