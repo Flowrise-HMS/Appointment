@@ -105,4 +105,20 @@ class AppointmentApiTest extends TestCase
         $response->assertStatus(422);
         $this->assertSame(1, Appointment::query()->count());
     }
+
+    public function test_bulk_reschedule_checks_every_appointment(): void
+    {
+        $appointment = Appointment::factory()->create(['branch_id' => $this->user->branch_id]);
+        $payload = [
+            'appointment_ids' => [$appointment->id],
+            'start_at' => now()->addDays(3)->setTime(10, 0)->toIso8601String(),
+            'end_at' => now()->addDays(3)->setTime(10, 30)->toIso8601String(),
+        ];
+
+        $this->actingAs($this->user)->postJson('/api/v1/appointments/bulk-reschedule', $payload)->assertForbidden();
+
+        Permission::findOrCreate('Update Appointment', 'web');
+        $this->user->givePermissionTo('Update Appointment');
+        $this->actingAs($this->user->fresh())->postJson('/api/v1/appointments/bulk-reschedule', $payload)->assertOk()->assertJsonPath('data.count', 1);
+    }
 }

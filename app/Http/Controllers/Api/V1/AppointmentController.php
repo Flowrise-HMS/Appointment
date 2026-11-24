@@ -116,8 +116,6 @@ class AppointmentController extends ApiController
      */
     public function bulkReschedule(Request $request): JsonResponse
     {
-        $this->authorizeApi('update', Appointment::class);
-
         $payload = $request->validate([
             'appointment_ids' => ['required', 'array'],
             'appointment_ids.*' => ['uuid'],
@@ -125,13 +123,13 @@ class AppointmentController extends ApiController
             'end_at' => ['required', 'date', 'after:start_at'],
         ]);
 
-        $updated = Appointment::query()
-            ->whereIn('id', $payload['appointment_ids'])
-            ->get()
-            ->map(fn (Appointment $appointment) => $this->schedulingService->reschedule($appointment, [
-                'start_at' => $payload['start_at'],
-                'end_at' => $payload['end_at'],
-            ]));
+        $appointments = Appointment::query()->whereIn('id', $payload['appointment_ids'])->get();
+        $appointments->each(fn (Appointment $appointment) => $this->authorizeApi('update', $appointment));
+
+        $updated = $appointments->map(fn (Appointment $appointment) => $this->schedulingService->reschedule($appointment, [
+            'start_at' => $payload['start_at'],
+            'end_at' => $payload['end_at'],
+        ]));
 
         return ApiResponse::ok(['count' => $updated->count()]);
     }

@@ -47,7 +47,7 @@ class AppointmentRecurrenceRuleInfolist
 
     public static function describe(AppointmentRecurrenceRule $record): string
     {
-        $frequency = RecurrenceFrequency::tryFrom((string) $record->frequency);
+        $frequency = enum_try_from(RecurrenceFrequency::class, (string) $record->frequency);
         $label = $frequency?->getLabel() ?? (string) $record->frequency;
         $interval = max(1, (int) $record->interval);
         $text = $interval > 1 ? __(':label, every :n', ['label' => $label, 'n' => $interval]) : $label;

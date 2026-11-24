@@ -161,7 +161,7 @@ class RecurrenceExpansionService
      */
     private function localDates(AppointmentRecurrenceRule $rule, Carbon $first, int $interval): \Generator
     {
-        $frequency = RecurrenceFrequency::tryFrom((string) $rule->frequency) ?? RecurrenceFrequency::WEEKLY;
+        $frequency = enum_try_from(RecurrenceFrequency::class, (string) $rule->frequency) ?? RecurrenceFrequency::WEEKLY;
         $anchor = $first->copy()->startOfDay();
         $days = $rule->byDayNumbers();
 
